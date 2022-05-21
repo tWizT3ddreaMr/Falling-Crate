@@ -41,7 +41,8 @@ public class main
 				config.addDefault("Location.Arena.X2", 0);
 				config.addDefault("Location.Arena.Y2", 0);
 				config.addDefault("Location.Arena.Z2", 0);
-				config.addDefault("Event.Armor", true);
+				config.addDefault("Setting.Armor", true);
+				config.addDefault("Setting.KnowlegeBook", true);
 				
 				config.addDefault("Crates.Diamond.ChestLocation.X", 0);
 				config.addDefault("Crates.Diamond.ChestLocation.Y", 0);
@@ -84,8 +85,8 @@ public class main
 	if(d1==d2)
 		return d1;
     Random r = new Random();
-    double small = Math.min(d1, d2);
-    double big = Math.max(d1, d2);
+    double small = Math.min(d1, d2),
+      big = Math.max(d1, d2);
     
     double randomValue = small + (big - small) * r.nextDouble();
     return randomValue;
@@ -95,8 +96,8 @@ public class main
 	if(d1==d2)
 		return d1;
     Random r = new Random();
-    int small = Math.min(d1, d2);
-    int big = Math.max(d1, d2);
+    int small = Math.min(d1, d2),
+      big = Math.max(d1, d2);
     
     int randomValue = small + (big - small) * r.nextInt();
     return randomValue;
@@ -107,9 +108,10 @@ public class main
 	  if(!(loc.getWorld().getName().equals(config.get("Location.Arena.World")))) {
 		  return false;
 	  }
-      double x2 = config.getDouble("Location.Arena.X2");
-      double x1 = config.getDouble("Location.Arena.X1");
-      double big=0.0D; double small=0.0D;
+      double big,small, 
+        x2 = config.getDouble("Location.Arena.X2"),
+    	x1 = config.getDouble("Location.Arena.X1");
+      
 
       small = Math.min(x1, x2);
       big = Math.max(x1, x2);
@@ -117,8 +119,8 @@ public class main
       if(!(loc.getX()>=small&&loc.getX()<=big)) {
     	  return false;
       }
-      double z1 = config.getDouble("Location.Arena.Z1");
-      double z2 = config.getDouble("Location.Arena.Z2");
+      double z1 = config.getDouble("Location.Arena.Z1"),
+    	 z2 = config.getDouble("Location.Arena.Z2");
 
       small = Math.min(z1, z2);
       big = Math.max(z1, z2);
@@ -140,12 +142,12 @@ public class main
   }else {
 	  if (args.length == 6)
       {
-        double x1 = getdoub(args[0]);
-        double y1 = getdoub(args[1]);
-        double z1 = getdoub(args[2]);
-        double x2 = getdoub(args[3]);
-        double y2 = getdoub(args[4]);
-        double z2 = getdoub(args[5]);
+        double x1 = getdoub(args[0]),
+          y1 = getdoub(args[1]),
+          z1 = getdoub(args[2]),
+          x2 = getdoub(args[3]),
+          y2 = getdoub(args[4]),
+          z2 = getdoub(args[5]);
         config = getConfig();
 		config.set("Location.Arena.World", ((BlockCommandSender)sender).getBlock().getWorld().getName());
 		config.set("Location.Arena.X1", x1);
@@ -170,10 +172,12 @@ public class main
 		  }
 			}
 		mute= false;
-		}else { for(Player p:Bukkit.getServer().getOnlinePlayers()) {
-			if(isInArena(p)) {
-			p.sendMessage(""+ChatColor.DARK_AQUA+ChatColor.BOLD+"Chat muted in arena");
-			}
+		}
+	    else {
+			for(Player p:Bukkit.getServer().getOnlinePlayers()) {
+				if(isInArena(p)) 
+					p.sendMessage(""+ChatColor.DARK_AQUA+ChatColor.BOLD+"Chat muted in arena");
+				
 		}
 		mute=true;
 		}
@@ -181,11 +185,9 @@ public class main
   }
     if (command.getName().equalsIgnoreCase("fallcrate"))
     {
-      if (!(sender instanceof BlockCommandSender))
-      {sender.sendMessage(ChatColor.DARK_AQUA+"No support for non-commandblocks");
-      }
-      if ((sender instanceof BlockCommandSender))
-      {
+      if (!(sender instanceof BlockCommandSender)) 
+    	  sender.sendMessage(ChatColor.DARK_AQUA+"No support for non-commandblocks");
+      
         BlockCommandSender send = (BlockCommandSender)sender;
         Location L = send.getBlock().getLocation();
         World world = L.getWorld();
@@ -194,22 +196,22 @@ public class main
           String type=args[0].substring(0,1).toUpperCase()+args[0].substring(1).toLowerCase();
           config = getConfig();
           
-          double x1 = config.getDouble("Location.Arena.X1");
-          double y1 = config.getDouble("Location.Arena.Y1");
-          double z1 = config.getDouble("Location.Arena.Z1");
-          double x2 = config.getDouble("Location.Arena.X2");
-          double y2 = config.getDouble("Location.Arena.Y2");
-          double z2 = config.getDouble("Location.Arena.Z2");
+          double x1 = config.getDouble("Location.Arena.X1"),
+            y1 = config.getDouble("Location.Arena.Y1"),
+            z1 = config.getDouble("Location.Arena.Z1"),
+            x2 = config.getDouble("Location.Arena.X2"),
+            y2 = config.getDouble("Location.Arena.Y2"),
+            z2 = config.getDouble("Location.Arena.Z2");
           
-          int x3 = (int)Math.round(getdoub(args[1]));
-          int y3 = (int)Math.round(getdoub(args[2]));
-          int z3 = (int)Math.round(getdoub(args[3]));
+          int x3 = (int)Math.round(getdoub(args[1])),
+            y3 = (int)Math.round(getdoub(args[2])),
+            z3 = (int)Math.round(getdoub(args[3]));
           
           x3 = L.getBlockX() + x3;y3 = L.getBlockY() + y3;z3 = L.getBlockZ() + z3;
           
-          double x = Math.round(rand(x1, x2)) + 0.5D;
-          double y = Math.round(rand(y1, y2));
-          double z = Math.round(rand(z1, z2)) + 0.5D;
+          double x = Math.round(rand(x1, x2)) + 0.5D,
+            y = Math.round(rand(y1, y2)),
+            z = Math.round(rand(z1, z2)) + 0.5D;
           
           config.set("Location."+type+".X",x3);
           config.set("Location."+type+".Y",y3);
@@ -223,15 +225,15 @@ public class main
         	int x3 = config.getInt("Location."+type+".X");
         	int y3 = config.getInt("Location."+type+".Y");
         	int z3 = config.getInt("Location."+type+".Z");
-        	double x1 = config.getDouble("Location.Arena.X1");
-	        double y1 = config.getDouble("Location.Arena.Y1");
-	        double z1 = config.getDouble("Location.Arena.Z1");
-	        double x2 = config.getDouble("Location.Arena.X2");
-	        double y2 = config.getDouble("Location.Arena.Y2");
-	        double z2 = config.getDouble("Location.Arena.Z2");
-	        double x = Math.round(rand(x1, x2)) + 0.5D;
-	        double y = Math.round(rand(y1, y2));
-	        double z = Math.round(rand(z1, z2)) + 0.5D;
+        	double x1 = config.getDouble("Location.Arena.X1"),
+	          y1 = config.getDouble("Location.Arena.Y1"),
+	          z1 = config.getDouble("Location.Arena.Z1"),
+	          x2 = config.getDouble("Location.Arena.X2"),
+	          y2 = config.getDouble("Location.Arena.Y2"),
+	          z2 = config.getDouble("Location.Arena.Z2");
+	        double x = Math.round(rand(x1, x2)) + 0.5D,
+	          y = Math.round(rand(y1, y2)),
+	          z = Math.round(rand(z1, z2)) + 0.5D;
 	        Dothething.NonPlayer(Double.valueOf(x), Double.valueOf(y), Double.valueOf(z), args[0], world, x3, y3, z3);
  	
         }
@@ -239,7 +241,7 @@ public class main
         {
           sender.sendMessage("incorrect syntax.");
         }
-      }
+      
       return true;
     }
     return false;

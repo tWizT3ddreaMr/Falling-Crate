@@ -27,6 +27,7 @@ import org.bukkit.event.entity.EntityChangeBlockEvent;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.metadata.MetadataValue;
 
@@ -131,8 +132,14 @@ public boolean isFallingBlock(FallingBlock b)
   }
   
   @EventHandler
-  public void rightClickDiamondBlock(PlayerInteractEvent e)
+  public void rightClickBlock(PlayerInteractEvent e)
   {
+  if(main.config.getBoolean("Setting.KnowlegeBook")) {
+	  if(!(e.getItem()==null||e.getItem().getType()==null))
+		  if(e.getItem().getType()==Material.KNOWLEDGE_BOOK) {
+			  e.setCancelled(true);
+	  }
+  }
     if (e.getClickedBlock() == null) {
       return;
     }
@@ -203,7 +210,7 @@ public boolean isFallingBlock(FallingBlock b)
     }
     int go = (int)Math.round(main.rand(0.0D, Viable - 1));
     if (item3[go] == null||item3[go].getType()==Material.AIR) return;
-    	if(main.config.getBoolean("Event.Armor")) {
+    	if(main.config.getBoolean("Setting.Armor")) {
     		boolean armor=false;
 		    for(ItemStack i:p.getInventory().getArmorContents()) {
 		    	if(!(i==null||i.getType()==Material.AIR)) {
@@ -236,7 +243,18 @@ public boolean isFallingBlock(FallingBlock b)
 	    	  p.getInventory().addItem(new ItemStack[] { item3[go] });
 	    	  
       }else {*/
-      p.getInventory().addItem(new ItemStack[] { item3[go] });
+        ItemStack FI=item3[go];
+        ItemStack ret=item3[go];
+        if(main.config.getBoolean("Setting.KnowlegeBook")) {
+	    	if(FI.getType()==Material.KNOWLEDGE_BOOK) {
+	    	  	  ItemMeta m=FI.getItemMeta();
+	    	  	  List<String> l=m.getLore();
+	    	  	  l.add(ChatColor.GREEN+"Awarded to "+p.getName());
+	    	  	  FI.setItemMeta(m);
+	    	}
+        }
+    	p.getInventory().addItem(new ItemStack[] { FI });
+    	FI=ret;
       //}
       
     
