@@ -181,7 +181,9 @@ public boolean isFallingBlock(FallingBlock b)
     
     int len = item.length;
     ItemStack[] item2 = new ItemStack[len];
-    int count=0, countb=0, Viable = 0;
+    int count=0,
+      countb=0,
+      Viable = 0;
     while (count < len)
     {
       if (item[count] != null&&item[count].getType() != Material.AIR)
