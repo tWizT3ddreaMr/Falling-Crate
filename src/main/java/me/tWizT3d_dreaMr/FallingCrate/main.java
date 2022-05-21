@@ -41,12 +41,14 @@ public class main
 				config.addDefault("Location.Arena.X2", 0);
 				config.addDefault("Location.Arena.Y2", 0);
 				config.addDefault("Location.Arena.Z2", 0);
+				config.addDefault("Event.Armor", true);
 				
 				config.addDefault("Crates.Diamond.ChestLocation.X", 0);
 				config.addDefault("Crates.Diamond.ChestLocation.Y", 0);
 				config.addDefault("Crates.Diamond.ChestLocation.Z", 0);
+				config.addDefault("Crates.Diamond.ChestLocation.World", "world");
 
-				config.addDefault("Crates.Diamond.Announce.Do", true);
+				config.addDefault("Crates.Diamond.Announce.AnnounceDrop", false);
 				config.addDefault("Crates.Diamond.Announce.String", "Diamond has dropped");
 				
 				List<String> Diamond=new ArrayList<String>();
@@ -59,8 +61,9 @@ public class main
         }
         plugin = this;
 		//Move to command
-        
-		Bukkit.getPluginManager().registerEvents(new Dothething(), this);
+        if(Dothething.init())
+        	Bukkit.getPluginManager().registerEvents(new Dothething(), this);
+		
   }
   
   public void onDisable() {}

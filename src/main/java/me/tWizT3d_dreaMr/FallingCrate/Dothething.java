@@ -1,5 +1,6 @@
 package me.tWizT3d_dreaMr.FallingCrate;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -12,10 +13,12 @@ import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
+import org.bukkit.block.Barrel;
 import org.bukkit.block.Block;
 import org.bukkit.block.Chest;
 import org.bukkit.block.DoubleChest;
 import org.bukkit.block.ShulkerBox;
+import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.FallingBlock;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -33,13 +36,29 @@ public class Dothething
   static World world;
   static HashMap<String,Location> locs;
   
-  
-  /*TODO
-   
-   Write an initialization class for locs
-   
-   * */
-  
+  public static boolean init() {
+	  FileConfiguration config=main.config;
+	  
+	  List<String> namelist=new ArrayList<String>(config.getConfigurationSection("Crates").getKeys(false));
+	  for(String key:namelist) {
+		  int x=config.getInt("Crates."+key+".ChestLocation.X");
+		  int y=config.getInt("Crates."+key+".ChestLocation.Y");
+		  int z=config.getInt("Crates."+key+".ChestLocation.Z");
+		  World world=Bukkit.getWorld(config.getString("Crates."+key+".ChestLocation.World"));
+		  if(world==null) {
+			  Bukkit.getLogger().log(Level.WARNING,"key"+key+" world is null, skipping");
+			  continue;
+		  }
+		  Location loc=new Location(world,x,y,z);
+		  locs.put(key, loc);
+	  
+	  }
+	  if(locs.isEmpty()) {
+		  Bukkit.getLogger().log(Level.SEVERE,"Chest location list is empty, please check config");
+		  return false;
+	  }
+	  return true;
+  }
   
   @EventHandler
   public void Chat(AsyncPlayerChatEvent e)
@@ -139,16 +158,23 @@ public boolean isFallingBlock(FallingBlock b)
     ItemStack[] item = null;
     if(block.getState() instanceof DoubleChest) {
     	item=((DoubleChest)block.getState()).getInventory().getContents();
-    }else if(block.getState() instanceof Chest) {
+    }
+    
+    if(block.getState() instanceof Chest) {
     	item=((Chest)block.getState()).getInventory().getContents();
-    }else if(block.getState() instanceof ShulkerBox) {
+    }
+    
+    if(block.getState() instanceof ShulkerBox) {
     	item=((ShulkerBox)block.getState()).getInventory().getContents();
     }
+    
+    if(block.getState() instanceof Barrel) {
+    	item=((Barrel)block.getState()).getInventory().getContents();
+    }
+    
     int len = item.length;
     ItemStack[] item2 = new ItemStack[len];
-    int count = 0;
-    int countb = 0;
-    int Viable = 0;
+    int count=0, countb=0, Viable = 0;
     while (count < len)
     {
       if (item[count] != null&&item[count].getType() != Material.AIR)
@@ -166,25 +192,31 @@ public boolean isFallingBlock(FallingBlock b)
     		while(item2[countb]==null||item2[countb].getType()==Material.AIR) {
     			countb++;
     		}
-    	} item3[count] = item2[countb];
-    	
-      count++;
-      countb++;
-    }if(Viable<=0) {
+    	}
+    	item3[count] = item2[countb];
+    	count++;
+    	countb++;
+    }
+    
+    if(Viable<=0) {
     	p.sendMessage(ChatColor.DARK_AQUA+"Out of Items in the chest. Type: "+ChatColor.AQUA+type);
     }
     int go = (int)Math.round(main.rand(0.0D, Viable - 1));
-    if (item3[go] != null&&item3[go].getType()!=Material.AIR) {
-    	boolean armor=false;
-    	for(ItemStack i:p.getInventory().getArmorContents()) {
-    		if(!(i==null||i.getType()==Material.AIR)) {
-    		armor=true;
-    		}
-    	}
-      if(armor) {
-    	  p.sendMessage(ChatColor.RED+"Remove your armor slot. No Item for you");
-    	  return;
-      }
+    if (item3[go] == null||item3[go].getType()==Material.AIR) return;
+    	if(main.config.getBoolean("Event.Armor")) {
+    		boolean armor=false;
+		    for(ItemStack i:p.getInventory().getArmorContents()) {
+		    	if(!(i==null||i.getType()==Material.AIR)) {
+		    	armor=true;
+		    	}
+		    }
+		    	
+		    if(armor) {
+		    	p.sendMessage(ChatColor.RED+"Remove your armor slot. No Item for you");
+		    	return;
+		    }
+    }
+  	
       /*
        TODO
        Implement "Eating Items"
@@ -206,7 +238,7 @@ public boolean isFallingBlock(FallingBlock b)
       }else {*/
       p.getInventory().addItem(new ItemStack[] { item3[go] });
       //}
-      }
+      
     
   }
   
@@ -227,11 +259,13 @@ public boolean isFallingBlock(FallingBlock b)
     fb.setDropItem(false);
     fb.setCustomName(keyname);
     fb.setMetadata("FallingBlock", new FixedMetadataValue(main.plugin, Boolean.valueOf(true)));
-    if(main.config.getBoolean("Crates."+keyname+".Announce.Do")) {
+    if(!main.config.contains("Crates."+keyname+".Announce.AnnounceDrop")) return;
+    if(main.config.getBoolean("Crates."+keyname+".Announce.AnnounceDrop")) {
+    	String msg=colors.formatnp(main.config.getString("Crates."+keyname+".Announce.String"));
 	    for(Player p:Bukkit.getServer().getOnlinePlayers()) {
 	  
 	    	if(me.tWizT3d_dreaMr.FallingCrate.main.isInArena(p)) {
-	        	p.sendMessage(ChatColor.translateAlternateColorCodes('&',main.config.getString("Crates."+keyname+".Announce.String")));
+	        	p.sendMessage(msg);
 		  }
 	    }
     }
