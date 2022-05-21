@@ -1,5 +1,7 @@
 package me.tWizT3d_dreaMr.FallingCrate;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 import java.util.Scanner;
 import org.bukkit.Bukkit;
@@ -23,18 +25,42 @@ public class main
   public static boolean mute;
   public static FileConfiguration config;
   public void onEnable()
-  { mute=false;
+  {
+	  	mute=false;
 		config = getConfig();
-		config.addDefault("Location.Arena.World", "not");
-		config.addDefault("Location.Arena.X1", 0);
-		config.addDefault("Location.Arena.Y1", 0);
-		config.addDefault("Location.Arena.Z1", 0);
-		config.addDefault("Location.Arena.X2", 0);
-		config.addDefault("Location.Arena.Y2", 0);
-		config.addDefault("Location.Arena.Z2", 0);
-		config.options().copyDefaults(true);
-        saveConfig();
-        plugin = this;Bukkit.getPluginManager().registerEvents(new Dothething(), this);
+		
+        int version=1;
+		if(!config.contains("version")) {
+			if(config.getInt("version")!=version) {
+				config.addDefault("Location.Arena.World", "not");
+				
+				config.addDefault("Location.Arena.X1", 0);
+				config.addDefault("Location.Arena.Y1", 0);
+				config.addDefault("Location.Arena.Z1", 0);
+				
+				config.addDefault("Location.Arena.X2", 0);
+				config.addDefault("Location.Arena.Y2", 0);
+				config.addDefault("Location.Arena.Z2", 0);
+				
+				config.addDefault("Crates.Diamond.ChestLocation.X", 0);
+				config.addDefault("Crates.Diamond.ChestLocation.Y", 0);
+				config.addDefault("Crates.Diamond.ChestLocation.Z", 0);
+
+				config.addDefault("Crates.Diamond.Announce.Do", true);
+				config.addDefault("Crates.Diamond.Announce.String", "Diamond has dropped");
+				
+				List<String> Diamond=new ArrayList<String>();
+				Diamond.add("DIAMOND_BLOCK");
+				config.addDefault("Crates.Diamond.Blocks", Diamond);
+				
+				config.options().copyDefaults(true);
+		        saveConfig();
+			}
+        }
+        plugin = this;
+		//Move to command
+        
+		Bukkit.getPluginManager().registerEvents(new Dothething(), this);
   }
   
   public void onDisable() {}
@@ -52,27 +78,27 @@ public class main
   
   static double rand(double d1, double d2)
   {
+	if(d1==d2)
+		return d1;
     Random r = new Random();
-    double small = 0.0D;
-    double big = 0.0D;
-    if (d1 > d2)
-    {
-      small = d2;
-      big = d1;
-    }
-    else
-    {
-      big = d2;
-      small = d1;
-    }
-    if(big==0&&small==0) {
-    	return 0;
-    }
+    double small = Math.min(d1, d2);
+    double big = Math.max(d1, d2);
+    
     double randomValue = small + (big - small) * r.nextDouble();
+    return randomValue;
+  }  
+  static int randint(int d1, int d2)
+  {
+	if(d1==d2)
+		return d1;
+    Random r = new Random();
+    int small = Math.min(d1, d2);
+    int big = Math.max(d1, d2);
+    
+    int randomValue = small + (big - small) * r.nextInt();
     return randomValue;
   }
   public static boolean isInArena(Player p) {
-	  
 	  
 	  Location loc=p.getLocation();
 	  if(!(loc.getWorld().getName().equals(config.get("Location.Arena.World")))) {
@@ -81,36 +107,28 @@ public class main
       double x2 = config.getDouble("Location.Arena.X2");
       double x1 = config.getDouble("Location.Arena.X1");
       double big=0.0D; double small=0.0D;
-      if (x1 > x2)
-      {
-        small = x2;
-        big = x1;
-      }
-      else
-      {
-        big = x2;
-        small = x1;
-      }
+
+      small = Math.min(x1, x2);
+      big = Math.max(x1, x2);
+      
       if(!(loc.getX()>=small&&loc.getX()<=big)) {
     	  return false;
       }
       double z1 = config.getDouble("Location.Arena.Z1");
       double z2 = config.getDouble("Location.Arena.Z2");
-      if (z1 > z2)
-      {
-        small = z2;
-        big = z1;
-      }
-      else
-      {
-        big = z2;
-        small = z1;
-      }
+
+      small = Math.min(z1, z2);
+      big = Math.max(z1, z2);
+      
       if(!(loc.getZ()>=small&&loc.getZ()<=big)) {
     	  return false;
       }
 	  return true;
   }
+  
+  //TODO
+  //Restructure commands
+  
   public boolean onCommand(CommandSender sender, Command command, String label, String[] args)
   {if (command.getName().equalsIgnoreCase("setfallcrate"))
   {
@@ -172,22 +190,28 @@ public class main
         {
           String type=args[0].substring(0,1).toUpperCase()+args[0].substring(1).toLowerCase();
           config = getConfig();
+          
           double x1 = config.getDouble("Location.Arena.X1");
           double y1 = config.getDouble("Location.Arena.Y1");
           double z1 = config.getDouble("Location.Arena.Z1");
           double x2 = config.getDouble("Location.Arena.X2");
           double y2 = config.getDouble("Location.Arena.Y2");
           double z2 = config.getDouble("Location.Arena.Z2");
+          
           int x3 = (int)Math.round(getdoub(args[1]));
           int y3 = (int)Math.round(getdoub(args[2]));
           int z3 = (int)Math.round(getdoub(args[3]));
+          
           x3 = L.getBlockX() + x3;y3 = L.getBlockY() + y3;z3 = L.getBlockZ() + z3;
+          
           double x = Math.round(rand(x1, x2)) + 0.5D;
           double y = Math.round(rand(y1, y2));
           double z = Math.round(rand(z1, z2)) + 0.5D;
+          
           config.set("Location."+type+".X",x3);
           config.set("Location."+type+".Y",y3);
           config.set("Location."+type+".Z",z3);
+          
           saveConfig();
           Dothething.NonPlayer(Double.valueOf(x), Double.valueOf(y), Double.valueOf(z), args[0], world, x3, y3, z3);
         }else if(args.length==1) {

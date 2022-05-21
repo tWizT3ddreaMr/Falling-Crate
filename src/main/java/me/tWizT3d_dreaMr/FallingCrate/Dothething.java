@@ -1,9 +1,11 @@
 package me.tWizT3d_dreaMr.FallingCrate;
 
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import java.util.logging.Level;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -28,23 +30,21 @@ import org.bukkit.metadata.MetadataValue;
 public class Dothething
   implements Listener
 {
-  static int num;
   static World world;
-  static Location Coal;
-  static Location Iron;
-  static Location Gold;
-  static Location Lapis;
-  static Location Diamond;
-  static Location Emerald;
-  static Location Beacon;
-  static Location Wool;
-  static Location Purpur;
-  static Location DragonEgg;
-  static String key;
+  static HashMap<String,Location> locs;
+  
+  
+  /*TODO
+   
+   Write an initialization class for locs
+   
+   * */
+  
+  
   @EventHandler
   public void Chat(AsyncPlayerChatEvent e)
   {
-	  if(Permission.canSetCrate.has(e.getPlayer())||!(me.tWizT3d_dreaMr.FallingCrate.main.mute)){
+	  if(e.getPlayer().hasPermission("tCrate.create") || !(me.tWizT3d_dreaMr.FallingCrate.main.mute)){
 		  return;
 	  }if(me.tWizT3d_dreaMr.FallingCrate.main.isInArena(e.getPlayer())){
 		  e.getPlayer().sendMessage(ChatColor.DARK_AQUA+"Chat mute in arena active");
@@ -53,7 +53,7 @@ public class Dothething
 	  }
 	  Set<Player> temp=new HashSet<Player>();
 	  for(Player p:e.getRecipients()) {
-		  if(me.tWizT3d_dreaMr.FallingCrate.main.isInArena(p)&&!(Permission.canSetCrate.has(p))) {
+		  if(me.tWizT3d_dreaMr.FallingCrate.main.isInArena(p) && !p.hasPermission("tCrate.create")) {
 			  
 			  temp.add(p);
 			 
@@ -70,99 +70,13 @@ public class Dothething
     if ((e.getEntity() instanceof FallingBlock))
     {
       FallingBlock fblock = (FallingBlock)e.getEntity();
-      if (fblock.getBlockData().getMaterial() == Material.DIAMOND_BLOCK)
-      {
-        e.getBlock().setType(Material.DIAMOND_BLOCK);
-        if (e.getBlock().getType() == Material.DIAMOND_BLOCK)
-        {
-          Block dia = e.getBlock();
-          dia.setMetadata("PlacedBlock", new FixedMetadataValue(main.plugin, Boolean.valueOf(false)));
-        }
-      }
-      if (fblock.getBlockData().getMaterial() == Material.BEACON)
-      {
-        e.getBlock().setType(Material.BEACON);
-        if (e.getBlock().getType() == Material.BEACON)
-        {
-          Block dia = e.getBlock();
-          dia.setMetadata("PlacedBlock", new FixedMetadataValue(main.plugin, Boolean.valueOf(false)));
-        }
-      }
-      if (fblock.getBlockData().getMaterial() == Material.EMERALD_BLOCK)
-      {
-        e.getBlock().setType(Material.EMERALD_BLOCK);
-        if (e.getBlock().getType() == Material.EMERALD_BLOCK)
-        {
-          Block emr = e.getBlock();
-          emr.setMetadata("PlacedBlock", new FixedMetadataValue(main.plugin, Boolean.valueOf(false)));
-        }
-      }
-      if (fblock.getBlockData().getMaterial() == Material.LAPIS_BLOCK)
-      {
-        e.getBlock().setType(Material.LAPIS_BLOCK);
-        if (e.getBlock().getType() == Material.LAPIS_BLOCK)
-        {
-          Block emr = e.getBlock();
-          emr.setMetadata("PlacedBlock", new FixedMetadataValue(main.plugin, Boolean.valueOf(false)));
-        }
-      }
-      if (fblock.getBlockData().getMaterial() == Material.PURPUR_BLOCK)
-      {
-        e.getBlock().setType(Material.PURPUR_BLOCK);
-        if (e.getBlock().getType() == Material.PURPUR_BLOCK)
-        {
-          Block emr = e.getBlock();
-          emr.setMetadata("PlacedBlock", new FixedMetadataValue(main.plugin, Boolean.valueOf(false)));
-        }
-      }
-      if (fblock.getBlockData().getMaterial() == Material.GOLD_BLOCK)
-      {
-        e.getBlock().setType(Material.GOLD_BLOCK);
-        if (e.getBlock().getType() == Material.GOLD_BLOCK)
-        {
-          Block emr = e.getBlock();
-          emr.setMetadata("PlacedBlock", new FixedMetadataValue(main.plugin, Boolean.valueOf(false)));
-        }
-      }
-      if (fblock.getBlockData().getMaterial() == Material.IRON_BLOCK)
-      {
-        e.getBlock().setType(Material.IRON_BLOCK);
-        if (e.getBlock().getType() == Material.IRON_BLOCK)
-        {
-          Block emr = e.getBlock();
-          emr.setMetadata("PlacedBlock", new FixedMetadataValue(main.plugin, Boolean.valueOf(false)));
-        }
-      }
-      if (fblock.getBlockData().getMaterial() == Material.COAL_BLOCK)
-      {
-        e.getBlock().setType(Material.COAL_BLOCK);
-        if (e.getBlock().getType() == Material.COAL_BLOCK)
-        {
-          Block emr = e.getBlock();
-          emr.setMetadata("PlacedBlock", new FixedMetadataValue(main.plugin, Boolean.valueOf(false)));
-        }
-      }
-      if (fblock.getBlockData().getMaterial() == Material.WHITE_WOOL)
-      {
-        e.getBlock().setType(Material.WHITE_WOOL);
-        if (e.getBlock().getType() == Material.WHITE_WOOL)
-        {
-          Block emr = e.getBlock();
-          emr.setMetadata("PlacedBlock", new FixedMetadataValue(main.plugin, Boolean.valueOf(false)));
-        }
-      }
-      if (fblock.getBlockData().getMaterial() == Material.DRAGON_EGG)
-      {
-        e.getBlock().setType(Material.DRAGON_EGG);
-        if (e.getBlock().getType() == Material.DRAGON_EGG)
-        {
-          Block emr = e.getBlock();
-          emr.setMetadata("PlacedBlock", new FixedMetadataValue(main.plugin, Boolean.valueOf(false)));
-        }
+      if(isFallingBlock(fblock)){
+    	  Block block = e.getBlock();
+          block.setMetadata("PlacedBlock", new FixedMetadataValue(main.plugin, Boolean.valueOf(false)));
+          block.setMetadata("Group", new FixedMetadataValue(main.plugin, fblock.getName()));
       }
     }
   }
-  
   public boolean isPlacedBlock(Block b)
   {
     List<MetadataValue> metaDataValues = b.getMetadata("PlacedBlock");
@@ -174,6 +88,28 @@ public class Dothething
     }
     return true;
   }
+public boolean isFallingBlock(FallingBlock b)
+{
+  List<MetadataValue> metaDataValues = b.getMetadata("FallingBlock");
+  Iterator<MetadataValue> localIterator = metaDataValues.iterator();
+  if (localIterator.hasNext())
+  {
+    MetadataValue value = (MetadataValue)localIterator.next();
+    return value.asBoolean();
+  }
+  return false;
+}
+  public String getName(Block b)
+  {
+    List<MetadataValue> metaDataValues = b.getMetadata("Group");
+    Iterator<MetadataValue> localIterator = metaDataValues.iterator();
+    if (localIterator.hasNext())
+    {
+      MetadataValue value = (MetadataValue)localIterator.next();
+      return value.asString();
+    }
+    return null;
+  }
   
   @EventHandler
   public void rightClickDiamondBlock(PlayerInteractEvent e)
@@ -181,64 +117,25 @@ public class Dothething
     if (e.getClickedBlock() == null) {
       return;
     }
+    Block b=e.getClickedBlock();
+    if(isPlacedBlock(b)) return;
     Player p = e.getPlayer();
-    Material m = e.getClickedBlock().getType();
-    if ((m == Material.DIAMOND_BLOCK) && 
-      (!isPlacedBlock(e.getClickedBlock())))
-    {
-      e.getClickedBlock().setType(Material.AIR);give("Diamond", p);
+    
+    String name=getName(b);
+    if(name==null) {
+    	Bukkit.getLogger().log(Level.SEVERE, "Error with name block material: "+b.getType().toString());
+    	return;
     }
-    if ((m == Material.WHITE_WOOL) && 
-      (!isPlacedBlock(e.getClickedBlock())))
-    {
-      e.getClickedBlock().setType(Material.AIR);give("wool", p);
-    }
-    if ((m == Material.BEACON) && 
-      (!isPlacedBlock(e.getClickedBlock())))
-    {
-      e.getClickedBlock().setType(Material.AIR);give("Beacon", p);
-    }
-    if ((m == Material.LAPIS_BLOCK) && 
-      (!isPlacedBlock(e.getClickedBlock())))
-    {
-      e.getClickedBlock().setType(Material.AIR);give("Lapis", p);
-    }
-    if ((m == Material.EMERALD_BLOCK) && 
-      (!isPlacedBlock(e.getClickedBlock())))
-    {
-      e.getClickedBlock().setType(Material.AIR);give("Emerald", p);
-    }
-    if ((m == Material.GOLD_BLOCK) && 
-      (!isPlacedBlock(e.getClickedBlock())))
-    {
-      e.getClickedBlock().setType(Material.AIR);give("Gold", p);
-    }
-    if ((m == Material.PURPUR_BLOCK) && 
-      (!isPlacedBlock(e.getClickedBlock())))
-    {
-      e.getClickedBlock().setType(Material.AIR);give("Purpur", p);
-    }
-    if ((m == Material.IRON_BLOCK) && 
-      (!isPlacedBlock(e.getClickedBlock())))
-    {
-      e.getClickedBlock().setType(Material.AIR);give("Iron", p);
-    }
-    if ((m == Material.COAL_BLOCK) && 
-      (!isPlacedBlock(e.getClickedBlock())))
-    {
-      e.getClickedBlock().setType(Material.AIR);give("Coal", p);
-    }
-    if ((m == Material.DRAGON_EGG) && 
-      (!isPlacedBlock(e.getClickedBlock())))
-    {
-      e.getClickedBlock().setType(Material.AIR);give("egg", p);
-      e.setCancelled(true);
-    }
+
+    e.getClickedBlock().setType(Material.AIR);
+    give(name, p);
+    
   }
   
   public static void give(String type, Player p)
   {
-    Block block = getLoc(type).getBlock();
+	
+    Block block = locs.get(type).getBlock();
     ItemStack[] item = null;
     if(block.getState() instanceof DoubleChest) {
     	item=((DoubleChest)block.getState()).getInventory().getContents();
@@ -284,117 +181,61 @@ public class Dothething
     		armor=true;
     		}
     	}
-      if(!armor) {if(type.equalsIgnoreCase("coal")) {
-      if(block.getState() instanceof DoubleChest) {
-    	  ((DoubleChest)block.getState()).getInventory().setItem(((DoubleChest)block.getState()).getInventory().first(item3[go]), new ItemStack(Material.AIR,0));;
-          
-      }else if(block.getState() instanceof Chest) {
-    	  ((Chest)block.getState()).getInventory().setItem(((Chest)block.getState()).getInventory().first(item3[go]), new ItemStack(Material.AIR,0));;
-      }else if(block.getState() instanceof ShulkerBox) {
-    	  ((ShulkerBox)block.getState()).getInventory().setItem(((ShulkerBox)block.getState()).getInventory().first(item3[go]), new ItemStack(Material.AIR,0));;
-          
-      }
-    	  p.getInventory().addItem(new ItemStack[] { item3[go] });
-    	  
-      }else {
-      p.getInventory().addItem(new ItemStack[] { item3[go] });
-      }
-      }else {
+      if(armor) {
     	  p.sendMessage(ChatColor.RED+"Remove your armor slot. No Item for you");
+    	  return;
       }
-    }
+      /*
+       TODO
+       Implement "Eating Items"
+       
+       if(type.equalsIgnoreCase("coal")) {
+    	  if(block.getState() instanceof DoubleChest) {
+	   	    ((DoubleChest)block.getState()).getInventory().setItem(((DoubleChest)block.getState()).getInventory().first(item3[go]), new ItemStack(Material.AIR,0));;
+	          
+	      }else 
+	       if(block.getState() instanceof Chest) {
+	         ((Chest)block.getState()).getInventory().setItem(((Chest)block.getState()).getInventory().first(item3[go]), new ItemStack(Material.AIR,0));;
+	      }else 
+	        if(block.getState() instanceof ShulkerBox) {
+	         ((ShulkerBox)block.getState()).getInventory().setItem(((ShulkerBox)block.getState()).getInventory().first(item3[go]), new ItemStack(Material.AIR,0));;
+	          
+	      }
+	    	  p.getInventory().addItem(new ItemStack[] { item3[go] });
+	    	  
+      }else {*/
+      p.getInventory().addItem(new ItemStack[] { item3[go] });
+      //}
+      }
+    
   }
   
   public static void NonPlayer(Double x, Double y, Double z, String keyname, World w, int cx, int cy, int cz)
   {
     keyname = keyname.substring(0, 1).toUpperCase() + keyname.substring(1).toLowerCase();
-    key = keyname;
     world = w;
     Location loc = new Location(world, x.doubleValue(), y.doubleValue(), z.doubleValue());
-    if (key.equalsIgnoreCase("Emerald"))
-    {
-      world.spawnFallingBlock(loc, Bukkit.createBlockData(Material.EMERALD_BLOCK)).setDropItem(false);
-      Emerald = new Location(world, cx, cy, cz);
+    @SuppressWarnings("unchecked")
+	List<String>bs=(List<String>)main.config.getList("Crates."+keyname+".Blocks");
+    
+    Material m=Material.getMaterial(bs.get(main.randint(1, bs.size())-1).toUpperCase(null));
+    if(m==null) {
+    	Bukkit.getLogger().log(Level.SEVERE, "Material in "+keyname+" is null");
+    	return;
     }
-    if (key.equalsIgnoreCase("Diamond"))
-    {
-      world.spawnFallingBlock(loc, Bukkit.createBlockData(Material.DIAMOND_BLOCK)).setDropItem(false);
-      Diamond = new Location(world, cx, cy, cz);
+    FallingBlock fb= world.spawnFallingBlock(loc, Bukkit.createBlockData(m));
+    fb.setDropItem(false);
+    fb.setCustomName(keyname);
+    fb.setMetadata("FallingBlock", new FixedMetadataValue(main.plugin, Boolean.valueOf(true)));
+    if(main.config.getBoolean("Crates."+keyname+".Announce.Do")) {
+	    for(Player p:Bukkit.getServer().getOnlinePlayers()) {
+	  
+	    	if(me.tWizT3d_dreaMr.FallingCrate.main.isInArena(p)) {
+	        	p.sendMessage(ChatColor.translateAlternateColorCodes('&',main.config.getString("Crates."+keyname+".Announce.String")));
+		  }
+	    }
     }
-    if (key.equalsIgnoreCase("PURPUR"))
-    {
-      world.spawnFallingBlock(loc, Bukkit.createBlockData(Material.PURPUR_BLOCK)).setDropItem(false);
-      Purpur = new Location(world, cx, cy, cz);
     }
-    if (key.equalsIgnoreCase("IRON"))
-    {for(Player p:Bukkit.getServer().getOnlinePlayers()) {
-    	if(me.tWizT3d_dreaMr.FallingCrate.main.isInArena(p)) {
-		  p.sendMessage(""+ChatColor.GRAY+ChatColor.BOLD+"IRON BLOCK DROPPED");
-	  }
-    }
-      world.spawnFallingBlock(loc, Bukkit.createBlockData(Material.IRON_BLOCK)).setDropItem(false);
-      Iron = new Location(world, cx, cy, cz);
-    }
-    if (key.equalsIgnoreCase("GOLD"))
-    {
-      world.spawnFallingBlock(loc, Bukkit.createBlockData(Material.GOLD_BLOCK)).setDropItem(false);
-      Gold = new Location(world, cx, cy, cz);
-    }
-    if (key.equalsIgnoreCase("COAL"))
-    {
-      world.spawnFallingBlock(loc, Bukkit.createBlockData(Material.COAL_BLOCK)).setDropItem(false);
-      Coal = new Location(world, cx, cy, cz);
-    }
-    if (key.equalsIgnoreCase("WOOL"))
-    {
-      world.spawnFallingBlock(loc, Bukkit.createBlockData(Material.WHITE_WOOL)).setDropItem(false);
-      Wool = new Location(world, cx, cy, cz);
-    }
-    if (key.equalsIgnoreCase("BEACON"))
-    {
-      world.spawnFallingBlock(loc, Bukkit.createBlockData(Material.BEACON)).setDropItem(false);
-      Beacon = new Location(world, cx, cy, cz);
-    }
-    if (key.equalsIgnoreCase("egg"))
-    {
-      world.spawnFallingBlock(loc, Bukkit.createBlockData(Material.DRAGON_EGG)).setDropItem(false);
-      DragonEgg = new Location(world, cx, cy, cz);
-    }
-  }
   
-  public static Location getLoc(String keyname)
-  {
-    Location loc = null;
-    if (keyname.equalsIgnoreCase("Emerald")) {
-      loc = Emerald;
-    }
-    if (keyname.equalsIgnoreCase("Diamond")) {
-      loc = Diamond;
-    }
-    if (keyname.equalsIgnoreCase("Purpur")) {
-      loc = Purpur;
-    }
-    if (keyname.equalsIgnoreCase("Iron")) {
-      loc = Iron;
-    }
-    if (keyname.equalsIgnoreCase("Gold")) {
-      loc = Gold;
-    }
-    if (keyname.equalsIgnoreCase("Coal")) {
-      loc = Coal;
-    }
-    if (keyname.equalsIgnoreCase("Wool")) {
-      loc = Wool;
-    }
-    if (keyname.equalsIgnoreCase("Beacon")) {
-      loc = Beacon;
-    }
-    if (keyname.equalsIgnoreCase("Lapis")) {
-      loc = Lapis;
-    }
-    if (keyname.equalsIgnoreCase("Egg")) {
-      loc = DragonEgg;
-    }
-    return loc;
-  }
+  
 }
