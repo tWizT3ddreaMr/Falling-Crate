@@ -18,8 +18,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 
-
-
 public class main
   extends JavaPlugin
 {
@@ -206,7 +204,29 @@ public class main
 	  Dothething.SetChest( x, y, z, args[0], bl.getWorld());
     return true;
    }
-  
+  if (command.getName().equalsIgnoreCase("cratesay"))
+  {
+	  if(sender instanceof Player) {
+	  if(!((Player)sender).hasPermission("tCrate.create")) {
+		  sender.sendMessage(ChatColor.RED+"No permissions");
+		 return true; 
+	  }
+  }
+	  String message="";
+	  if(args.length==0) {
+		  sender.sendMessage(ChatColor.RED+"Where is your message?");
+		  return true;
+	  }
+  for(String temp: args) message=message+" "+temp;
+  message=ChatColor.translateAlternateColorCodes('&', message);
+	  for(Player p:Bukkit.getServer().getOnlinePlayers()) {
+		    
+	    	if(isInArena(p)) {
+			  p.sendMessage(ChatColor.AQUA+"["+ChatColor.WHITE+ChatColor.BOLD+"Arena"+ChatColor.AQUA+"]"+colors.formatnp(message));
+		  }
+  }sender.sendMessage(ChatColor.AQUA+"You sent:/n["+ChatColor.WHITE+ChatColor.BOLD+"Arena"+ChatColor.AQUA+"]"+colors.formatnp(message));
+  return true;
+  }
     if (command.getName().equalsIgnoreCase("fallcrate"))
     {
       if (!(sender instanceof BlockCommandSender||sender instanceof ConsoleCommandSender)) {

@@ -1,6 +1,6 @@
 name: FallingCrate
 author: tWizT3d_dreaMr
-version: 1.0.0
+version: 1.0.1
 main: me.tWizT3d_dreaMr.FallingCrate.main
 commands:
    fallcrate:
@@ -15,6 +15,9 @@ commands:
    FCChestSet:
       description: Makes a falling crate chest
       usage: FCChestSet x y z (note coords are addative)
+   cratesay:
+      description: Sends a message to all people in the arena.
+      usage: cratesay <message>
 permissions:
   tCrate.create:
     default: op
