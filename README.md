@@ -3,9 +3,12 @@ Commands
 -------------------------------------------
 fallcrate
 
-  Usage: fallcrate <x> <y> <z>
+  Usage: fallcrate 
   
-    notes: x y and z are semi optional. They are relative aswell
+FCChestSet
+
+  Usage: FCChestSet <~x> <~y> <~z> 
+  
 
 setfallcrate
 
@@ -19,9 +22,19 @@ togglefallcrateevent
   
     notes: Toggles chat in arena specified in setfallcrate ignoring y coord
     
-    
+
 Permissions
 ---------------------------------------------------------------
 tCrate.create
 
     ignores chatmute
+
+Features going to be added
+---------------------------------------------------------------
+
+  Cratesay- speak only to people in arena
+
+  Crates "eating" items
+  
+  Api- events
+  
