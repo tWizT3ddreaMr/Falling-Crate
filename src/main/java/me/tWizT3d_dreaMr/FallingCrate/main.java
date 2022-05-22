@@ -224,7 +224,9 @@ public class main
 	    	if(isInArena(p)) {
 			  p.sendMessage(ChatColor.AQUA+"["+ChatColor.WHITE+ChatColor.BOLD+"Arena"+ChatColor.AQUA+"]"+colors.formatnp(message));
 		  }
-  }sender.sendMessage(ChatColor.AQUA+"You sent:/n["+ChatColor.WHITE+ChatColor.BOLD+"Arena"+ChatColor.AQUA+"]"+colors.formatnp(message));
+  }
+  sender.sendMessage(ChatColor.AQUA+"You sent:");
+  sender.sendMessage(ChatColor.AQUA+"["+ ChatColor.WHITE+ChatColor.BOLD+"Arena"+ChatColor.AQUA+"]"+colors.formatnp(message));
   return true;
   }
     if (command.getName().equalsIgnoreCase("fallcrate"))
