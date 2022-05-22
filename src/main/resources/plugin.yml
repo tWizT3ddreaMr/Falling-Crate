@@ -1,11 +1,11 @@
 name: FallingCrate
 author: tWizT3d_dreaMr
-version: 0.2.3
+version: 1.0.0
 main: me.tWizT3d_dreaMr.FallingCrate.main
 commands:
    fallcrate:
       description: Makes a falling crate.
-      usage: /fallcrate keyname <chest location>
+      usage: /fallcrate keyname
    setfallcrate:
       description: Makes a falling crate.
       usage: setfallcrate x1 y1 z1 x2 y2 z2
@@ -13,8 +13,8 @@ commands:
       description: Makes a falling crate.
       usage: togglefallcrateeventFCChestSet
    FCChestSet:
-      description: Makes a falling crate.
-      usage: FCChestSet
+      description: Makes a falling crate chest
+      usage: FCChestSet x y z (note coords are addative)
 permissions:
   tCrate.create:
     default: op

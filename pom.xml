@@ -6,7 +6,7 @@
 
     <groupId>me.tWizT3d_dreaMr</groupId>
     <artifactId>FallingCrate</artifactId>
-    <version>0.2.2</version>
+    <version>1.0.0</version>
 
     <properties>
         <maven.compiler.source>17</maven.compiler.source>
@@ -30,7 +30,7 @@
     </dependencies>
 
     <build>
-        <finalName>${project.artifactId}</finalName>
+        <finalName>${project.artifactId}-${project.version}</finalName>
         <defaultGoal>clean package</defaultGoal>
         <plugins>
             <plugin>
@@ -52,3 +52,4 @@
     </build>
 
 </project>
+
