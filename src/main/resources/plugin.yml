@@ -1,6 +1,6 @@
 name: FallingCrate
 author: tWizT3d_dreaMr
-version: 0.2.2
+version: 0.2.3
 main: me.tWizT3d_dreaMr.FallingCrate.main
 commands:
    fallcrate:
@@ -11,9 +11,12 @@ commands:
       usage: setfallcrate x1 y1 z1 x2 y2 z2
    togglefallcrateevent:
       description: Makes a falling crate.
-      usage: togglefallcrateevent
+      usage: togglefallcrateeventFCChestSet
+   FCChestSet:
+      description: Makes a falling crate.
+      usage: FCChestSet
 permissions:
   tCrate.create:
     default: op
     description: Allows the player to make a falling crate.
-api-version: 1.13
+api-version: 1.18

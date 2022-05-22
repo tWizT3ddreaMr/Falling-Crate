@@ -26,6 +26,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityChangeBlockEvent;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.metadata.FixedMetadataValue;
@@ -39,17 +40,17 @@ public class Dothething
   
   public static boolean init() {
 	  FileConfiguration config=main.config;
-	  
+	  locs=new HashMap<String,Location>();
 	  List<String> namelist=new ArrayList<String>(config.getConfigurationSection("Crates").getKeys(false));
 	  for(String key:namelist) {
 		  int x=config.getInt("Crates."+key+".ChestLocation.X");
 		  int y=config.getInt("Crates."+key+".ChestLocation.Y");
 		  int z=config.getInt("Crates."+key+".ChestLocation.Z");
-		  World world=Bukkit.getWorld(config.getString("Crates."+key+".ChestLocation.World"));
-		  if(world==null) {
+		  if(Bukkit.getWorld(config.getString("Crates."+key+".ChestLocation.World"))==null) {
 			  Bukkit.getLogger().log(Level.WARNING,"key"+key+" world is null, skipping");
 			  continue;
 		  }
+		  World world=Bukkit.getWorld(config.getString("Crates."+key+".ChestLocation.World"));
 		  Location loc=new Location(world,x,y,z);
 		  locs.put(key, loc);
 	  
@@ -143,6 +144,8 @@ public boolean isFallingBlock(FallingBlock b)
     if (e.getClickedBlock() == null) {
       return;
     }
+    if(!e.getHand().equals(EquipmentSlot.HAND))
+    		return;
     Block b=e.getClickedBlock();
     if(isPlacedBlock(b)) return;
     Player p = e.getPlayer();
@@ -155,6 +158,7 @@ public boolean isFallingBlock(FallingBlock b)
 
     e.getClickedBlock().setType(Material.AIR);
     give(name, p);
+    e.setCancelled(true);
     
   }
   
@@ -244,33 +248,51 @@ public boolean isFallingBlock(FallingBlock b)
 	      }
 	    	  p.getInventory().addItem(new ItemStack[] { item3[go] });
 	    	  
-      }else {*/
-        ItemStack FI=item3[go];
-        ItemStack ret=item3[go];
-        if(main.config.getBoolean("Setting.KnowlegeBook")) {
+      }else {*/ 
+      ItemStack FI=item3[go];
+      ItemStack ret=item3[go];
+      if(main.config.getBoolean("Setting.KnowlegeBook")) {
 	    	if(FI.getType()==Material.KNOWLEDGE_BOOK) {
 	    	  	  ItemMeta m=FI.getItemMeta();
 	    	  	  List<String> l=m.getLore();
 	    	  	  l.add(ChatColor.GREEN+"Awarded to "+p.getName());
 	    	  	  FI.setItemMeta(m);
 	    	}
-        }
-    	p.getInventory().addItem(new ItemStack[] { FI });
-    	FI=ret;
-      //}
+      }
+  	p.getInventory().addItem(new ItemStack[] { FI });
+  	FI=ret;
       
     
   }
   
-  public static void NonPlayer(Double x, Double y, Double z, String keyname, World w, int cx, int cy, int cz)
+  public static void SetChest(double d, double e, double f, String keyname, World w)
+  {
+	  if(locs.containsKey(keyname)) 
+		  locs.replace(keyname, new Location(w,d,e,f));
+	  else {
+		  locs.put(keyname, new Location(w,d,e,f));
+		  main.config.addDefault("Crates."+keyname+".Announce.AnnounceDrop", false);
+		  main.config.addDefault("Crates."+keyname+".Announce.String", "&b"+keyname+" has dropped");
+		  }
+	  main.config.set("Crates."+keyname+".ChestLocation.X", d);
+	  main.config.set("Crates."+keyname+".ChestLocation.Y", e);
+	  main.config.set("Crates."+keyname+".ChestLocation.Z", f);
+	  main.config.set("Crates."+keyname+".ChestLocation.World", w.getName());
+	  List<String> blist=new ArrayList<String>();
+	  blist.add("DIAMOND_BLOCK");
+	  main.config.set("Crates.Diamond.Blocks", blist);
+	  
+	  main.plugin.saveConfig();
+  }
+  public static void NonPlayer(Double x, Double y, Double z, String keyname, World w)
   {
     keyname = keyname.substring(0, 1).toUpperCase() + keyname.substring(1).toLowerCase();
     world = w;
-    Location loc = new Location(world, x.doubleValue(), y.doubleValue(), z.doubleValue());
+    Location loc = new Location(world, x, y, z);
     @SuppressWarnings("unchecked")
 	List<String>bs=(List<String>)main.config.getList("Crates."+keyname+".Blocks");
     
-    Material m=Material.getMaterial(bs.get(main.randint(1, bs.size())-1).toUpperCase(null));
+    Material m=Material.getMaterial(bs.get(main.randint(1, bs.size())-1).toUpperCase());
     if(m==null) {
     	Bukkit.getLogger().log(Level.SEVERE, "Material in "+keyname+" is null");
     	return;
@@ -281,7 +303,7 @@ public boolean isFallingBlock(FallingBlock b)
     fb.setMetadata("FallingBlock", new FixedMetadataValue(main.plugin, Boolean.valueOf(true)));
     if(!main.config.contains("Crates."+keyname+".Announce.AnnounceDrop")) return;
     if(main.config.getBoolean("Crates."+keyname+".Announce.AnnounceDrop")) {
-    	String msg=colors.formatnp(main.config.getString("Crates."+keyname+".Announce.String"));
+    	String msg= colors.formatnp(main.config.getString("Crates."+keyname+".Announce.String"));
 	    for(Player p:Bukkit.getServer().getOnlinePlayers()) {
 	  
 	    	if(me.tWizT3d_dreaMr.FallingCrate.main.isInArena(p)) {

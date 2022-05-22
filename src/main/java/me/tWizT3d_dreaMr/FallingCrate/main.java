@@ -4,13 +4,15 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 import java.util.Scanner;
+import java.util.logging.Level;
+
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
-import org.bukkit.World;
 import org.bukkit.command.BlockCommandSender;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
+import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
@@ -99,7 +101,7 @@ public class main
     int small = Math.min(d1, d2),
       big = Math.max(d1, d2);
     
-    int randomValue = small + (big - small) * r.nextInt();
+    int randomValue = r.nextInt(small, big);
     return randomValue;
   }
   public static boolean isInArena(Player p) {
@@ -139,7 +141,8 @@ public class main
   {
 	  if (!(sender instanceof BlockCommandSender))
   {sender.sendMessage(ChatColor.DARK_AQUA+"No support for non-commandblocks");
-  }else {
+  return true;
+  }
 	  if (args.length == 6)
       {
         double x1 = getdoub(args[0]),
@@ -159,7 +162,7 @@ public class main
 		sender.sendMessage("Area set");
 		saveConfig();
         }
-  }
+  //
 	  return true;
   }
   if (command.getName().equalsIgnoreCase("togglefallcrateevent"))
@@ -183,48 +186,41 @@ public class main
 		}
 	  return true;
   }
+  if (command.getName().equalsIgnoreCase("FCChestSet"))
+  {
+    if (!(sender instanceof BlockCommandSender||sender instanceof ConsoleCommandSender)) {
+  	  sender.sendMessage(ChatColor.DARK_AQUA+"No support for non-commandblocks");
+  	  return true;
+    }
+    if(args.length!=4)
+    {
+        sender.sendMessage("incorrect syntax.");
+    	return true;
+    }
+    Location bl=((BlockCommandSender)sender).getBlock().getLocation();
+
+	  Bukkit.getLogger().log(Level.INFO, bl.getWorld().getName());
+	  int x=bl.getBlockX()+Integer.parseInt(args[1]),
+	    y=bl.getBlockY()+Integer.parseInt(args[2]),
+	    z=bl.getBlockZ()+Integer.parseInt(args[3]);
+	  Dothething.SetChest( x, y, z, args[0], bl.getWorld());
+    return true;
+   }
+  
     if (command.getName().equalsIgnoreCase("fallcrate"))
     {
-      if (!(sender instanceof BlockCommandSender)) 
+      if (!(sender instanceof BlockCommandSender||sender instanceof ConsoleCommandSender)) {
     	  sender.sendMessage(ChatColor.DARK_AQUA+"No support for non-commandblocks");
+    	  return true;
+      }
+     
       
-        BlockCommandSender send = (BlockCommandSender)sender;
-        Location L = send.getBlock().getLocation();
-        World world = L.getWorld();
-        if (args.length > 1)
-        {
-          String type=args[0].substring(0,1).toUpperCase()+args[0].substring(1).toLowerCase();
-          config = getConfig();
-          
-          double x1 = config.getDouble("Location.Arena.X1"),
-            y1 = config.getDouble("Location.Arena.Y1"),
-            z1 = config.getDouble("Location.Arena.Z1"),
-            x2 = config.getDouble("Location.Arena.X2"),
-            y2 = config.getDouble("Location.Arena.Y2"),
-            z2 = config.getDouble("Location.Arena.Z2");
-          
-          int x3 = (int)Math.round(getdoub(args[1])),
-            y3 = (int)Math.round(getdoub(args[2])),
-            z3 = (int)Math.round(getdoub(args[3]));
-          
-          x3 = L.getBlockX() + x3;y3 = L.getBlockY() + y3;z3 = L.getBlockZ() + z3;
-          
-          double x = Math.round(rand(x1, x2)) + 0.5D,
-            y = Math.round(rand(y1, y2)),
-            z = Math.round(rand(z1, z2)) + 0.5D;
-          
-          config.set("Location."+type+".X",x3);
-          config.set("Location."+type+".Y",y3);
-          config.set("Location."+type+".Z",z3);
-          
-          saveConfig();
-          Dothething.NonPlayer(Double.valueOf(x), Double.valueOf(y), Double.valueOf(z), args[0], world, x3, y3, z3);
-        }else if(args.length==1) {
+        if(args.length==1) {
         	 config = getConfig();
         	String type=args[0].substring(0,1).toUpperCase()+args[0].substring(1).toLowerCase();
-        	int x3 = config.getInt("Location."+type+".X");
-        	int y3 = config.getInt("Location."+type+".Y");
-        	int z3 = config.getInt("Location."+type+".Z");
+        	if(!config.contains("Crates.Diamond.ChestLocation.X")) {
+        		sender.sendMessage("Section does not exist");
+        	}
         	double x1 = config.getDouble("Location.Arena.X1"),
 	          y1 = config.getDouble("Location.Arena.Y1"),
 	          z1 = config.getDouble("Location.Arena.Z1"),
@@ -234,7 +230,7 @@ public class main
 	        double x = Math.round(rand(x1, x2)) + 0.5D,
 	          y = Math.round(rand(y1, y2)),
 	          z = Math.round(rand(z1, z2)) + 0.5D;
-	        Dothething.NonPlayer(Double.valueOf(x), Double.valueOf(y), Double.valueOf(z), args[0], world, x3, y3, z3);
+	        Dothething.NonPlayer(Double.valueOf(x), Double.valueOf(y), Double.valueOf(z), type, Bukkit.getWorld(config.getString("Location.Arena.World")));
  	
         }
         else
