@@ -8,7 +8,10 @@ fallcrate
 FCChestSet
 
   Usage: FCChestSet <~x> <~y> <~z> 
-  
+
+Cratesay
+
+  Usage: Cratesay <message>
 
 setfallcrate
 
@@ -32,7 +35,6 @@ tCrate.create
 Features going to be added
 ---------------------------------------------------------------
 
-  Cratesay- speak only to people in arena
 
   Crates "eating" items option for each crate
   
