@@ -34,7 +34,7 @@ Features going to be added
 
   Cratesay- speak only to people in arena
 
-  Crates "eating" items
+  Crates "eating" items option for each crate
   
   Api- events
   
