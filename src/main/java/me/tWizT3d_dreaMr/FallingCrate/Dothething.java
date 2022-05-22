@@ -166,6 +166,11 @@ public boolean isFallingBlock(FallingBlock b)
   {
 	
     Block block = locs.get(type).getBlock();
+    if(block==null||block.getType()==Material.AIR) {
+    	Bukkit.getLogger().log(Level.SEVERE, "Chest for "+type+" is null. "+p.getName()+" did not get item.");
+    	p.sendMessage(ChatColor.RED+"Chest does not exist.");
+    	return;
+    }
     ItemStack[] item = null;
     if(block.getState() instanceof DoubleChest) {
     	item=((DoubleChest)block.getState()).getInventory().getContents();
