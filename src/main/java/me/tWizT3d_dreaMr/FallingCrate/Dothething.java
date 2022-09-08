@@ -33,11 +33,13 @@ public class Dothething
           int x = config.getInt("Crates." + key + ".ChestLocation.X");
           int y = config.getInt("Crates." + key + ".ChestLocation.Y");
           int z = config.getInt("Crates." + key + ".ChestLocation.Z");
+    	  log(key+" "+x+", "+y+", "+z);
           if (Bukkit.getWorld(config.getString("Crates." + key + ".ChestLocation.World")) == null) {
               Bukkit.getLogger().log(Level.WARNING, "key" + key + " world is null, skipping");
               continue;
           }
           World world = Bukkit.getWorld(config.getString("Crates." + key + ".ChestLocation.World"));
+    	  log(key+" "+x+", "+y+", "+z+", "+world.getName());
           Location loc = new Location(world, x, y, z);
           locs.put(key, loc);
 
@@ -102,12 +104,16 @@ public class Dothething
     	count++;
     	countb++;
     }
+    log("countb "+countb+", count "+count+", Viable "+Viable);
 
       if(Viable<=0) {
     	p.sendMessage(ChatColor.DARK_AQUA+"Out of Items in the chest. Type: "+ChatColor.AQUA+type);
     }
     int go = (int)Math.round(main.rand(0.0D, Viable - 1));
-      if (item3[go] == null || item3[go].getType() == Material.AIR) return;
+    log("go "+go);
+      if (item3[go] == null || item3[go].getType() == Material.AIR) {
+    	  log("item3 null");
+    	  return;}
       if (main.config.getBoolean("Setting.Armor")) {
           boolean armor = false;
           for (ItemStack i : p.getInventory().getArmorContents()) {
@@ -151,6 +157,7 @@ public class Dothething
               FI.setItemMeta(m);
           }
       }
+      log(FI.getType().name());
       p.getInventory().addItem(FI);
       FI = ret;
 
@@ -230,10 +237,17 @@ public class Dothething
 
     }
 
+    public static void log(String s) {
+    	Bukkit.getLogger().log(Level.INFO, s);
+    }
+    
     @EventHandler
     public void checkBlock(EntityChangeBlockEvent e) {
+    	log("CheckBlock engage");
         if ((e.getEntity() instanceof FallingBlock fblock)) {
+        	log("is FallingBlock");
             if (isFallingBlock(fblock)) {
+            	log("is my FallingBlock");
                 Block block = e.getBlock();
                 block.setMetadata("PlacedBlock", new FixedMetadataValue(main.plugin, Boolean.FALSE));
                 block.setMetadata("Group", new FixedMetadataValue(main.plugin, fblock.getName()));
@@ -242,6 +256,7 @@ public class Dothething
     }
 
     public boolean isPlacedBlock(Block b) {
+    	log("isplacedblock engaged");
         List<MetadataValue> metaDataValues = b.getMetadata("PlacedBlock");
         Iterator<MetadataValue> localIterator = metaDataValues.iterator();
         if (localIterator.hasNext()) {
@@ -266,6 +281,7 @@ public class Dothething
         Iterator<MetadataValue> localIterator = metaDataValues.iterator();
         if (localIterator.hasNext()) {
             MetadataValue value = localIterator.next();
+            log(value.asString());
             return value.asString();
         }
         return null;
@@ -285,10 +301,12 @@ public class Dothething
         if (!e.getHand().equals(EquipmentSlot.HAND))
             return;
         Block b = e.getClickedBlock();
+        log(""+isPlacedBlock(b));
         if (isPlacedBlock(b)) return;
         Player p = e.getPlayer();
 
         String name = getName(b);
+        log(name);
         if (name == null) {
             Bukkit.getLogger().log(Level.SEVERE, "Error with name block material: " + b.getType());
             return;
