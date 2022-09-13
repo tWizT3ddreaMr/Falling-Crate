@@ -50,8 +50,7 @@ public class main
 		Random r = new Random();
 		int small = Math.min(d1, d2),
 				big = Math.max(d1, d2);
-
-		return r.nextInt(small, big);
+		return small+r.nextInt(big-small);
 	}
 
 	public static boolean isInArena(Player p) {
@@ -118,13 +117,14 @@ public class main
 				saveConfig();
 			}
         }
+		
         plugin = this;
 		//Move to command
         if(Dothething.init())
         	Bukkit.getPluginManager().registerEvents(new Dothething(), this);
-
+        
   }
-  
+
   //TODO
   //Restructure commands
   

@@ -24,9 +24,10 @@ public class Dothething
 {
   static World world;
   static HashMap<String,Location> locs;
-  
+  private static boolean Logger;
   public static boolean init() {
       FileConfiguration config = main.config;
+      Logger=config.contains("Logger") ? (config.isBoolean("Logger") ? config.getBoolean("Logger") : false) : false;
       locs = new HashMap<>();
       List<String> namelist = new ArrayList<>(config.getConfigurationSection("Crates").getKeys(false));
       for (String key : namelist) {
@@ -238,7 +239,8 @@ public class Dothething
     }
 
     public static void log(String s) {
-    	Bukkit.getLogger().log(Level.INFO, s);
+    	if(Logger)
+    		Bukkit.getLogger().log(Level.INFO, s);
     }
     
     @EventHandler
