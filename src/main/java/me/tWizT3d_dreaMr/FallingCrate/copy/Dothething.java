@@ -1,4 +1,4 @@
-package me.tWizT3d_dreaMr.FallingCrate;
+package me.tWizT3d_dreaMr.FallingCrate.copy;
 
 import org.bukkit.*;
 import org.bukkit.block.*;
@@ -24,11 +24,13 @@ public class Dothething
 {
   static World world;
   static HashMap<String,Location> locs;
+  private static HashMap<Location, Long> times;
   private static boolean Logger;
   public static boolean init() {
       FileConfiguration config = main.config;
       Logger=config.contains("Logger") ? (config.isBoolean("Logger") ? config.getBoolean("Logger") : false) : false;
       locs = new HashMap<>();
+      times = new HashMap<>();
       List<String> namelist = new ArrayList<>(config.getConfigurationSection("Crates").getKeys(false));
       for (String key : namelist) {
           int x = config.getInt("Crates." + key + ".ChestLocation.X");
@@ -173,6 +175,8 @@ public class Dothething
           locs.put(keyname, new Location(w, d, e, f));
           main.config.addDefault("Crates." + keyname + ".Announce.AnnounceDrop", false);
           main.config.addDefault("Crates." + keyname + ".Announce.String", "&b" + keyname + " has dropped");
+          main.config.addDefault("Crates." + keyname + ".Announce.Grab.AnnounceGrab", false);
+          main.config.addDefault("Crates." + keyname + ".Announce.Grab.String", "&b%player has gotten %name%");
       }
       main.config.set("Crates." + keyname + ".ChestLocation.X", d);
       main.config.set("Crates." + keyname + ".ChestLocation.Y", e);
@@ -204,9 +208,10 @@ public class Dothething
         if (!main.config.contains("Crates." + keyname + ".Announce.AnnounceDrop")) return;
         if (main.config.getBoolean("Crates." + keyname + ".Announce.AnnounceDrop")) {
             String msg = colors.formatnp(main.config.getString("Crates." + keyname + ".Announce.String"));
+            msg=msg.replace("%name%", keyname);
             for (Player p : Bukkit.getServer().getOnlinePlayers()) {
 
-                if (me.tWizT3d_dreaMr.FallingCrate.main.isInArena(p)) {
+                if (main.isInArena(p)) {
                     p.sendMessage(msg);
                 }
             }
@@ -215,17 +220,17 @@ public class Dothething
 
     @EventHandler
     public void Chat(AsyncPlayerChatEvent e) {
-        if (e.getPlayer().hasPermission("tCrate.create") || !(me.tWizT3d_dreaMr.FallingCrate.main.mute)) {
+        if (e.getPlayer().hasPermission("tCrate.create") || !(main.mute)) {
             return;
         }
-        if (me.tWizT3d_dreaMr.FallingCrate.main.isInArena(e.getPlayer())) {
+        if (main.isInArena(e.getPlayer())) {
             e.getPlayer().sendMessage(ChatColor.DARK_AQUA + "Chat mute in arena active");
             e.setCancelled(true);
             return;
         }
         Set<Player> temp = new HashSet<>();
         for (Player p : e.getRecipients()) {
-            if (me.tWizT3d_dreaMr.FallingCrate.main.isInArena(p) && !p.hasPermission("tCrate.create")) {
+            if (main.isInArena(p) && !p.hasPermission("tCrate.create")) {
 
                 temp.add(p);
 
@@ -297,12 +302,24 @@ public class Dothething
                     e.setCancelled(true);
                 }
         }
+
+        Block b = e.getClickedBlock();
+		Location loc=b.getLocation();
+		log(b.getType().name());
+		log(""+loc.getBlockX()+" "+loc.getBlockY()+" "+loc.getBlockZ()+" "+loc.getWorld());
+		log(" "+System.currentTimeMillis());
+    	if(times.containsKey(loc)) {
+    		log(" "+times.get(loc));
+    		if(times.get(loc)+2000>System.currentTimeMillis())
+    			return;
+    		times.remove(loc);
+    	}  
+    	times.put(loc, System.currentTimeMillis());
         if (e.getClickedBlock() == null) {
             return;
         }
         if (!e.getHand().equals(EquipmentSlot.HAND))
             return;
-        Block b = e.getClickedBlock();
         log(""+isPlacedBlock(b));
         if (isPlacedBlock(b)) return;
         Player p = e.getPlayer();
@@ -313,8 +330,20 @@ public class Dothething
             Bukkit.getLogger().log(Level.SEVERE, "Error with name block material: " + b.getType());
             return;
         }
+        if (main.config.contains("Crates." + name + ".Announce.Grab.AnnounceGrab")&&main.config.getBoolean("Crates." + name + ".Announce.Grab.AnnounceGrab")) {
+            String msg = colors.formatnp(main.config.getString("Crates." + name + ".Announce.Grab.String"));
+            msg=msg.replace("%playar%", p.getName());
+            msg=msg.replace("%name%", name);
+            for (Player pla : Bukkit.getServer().getOnlinePlayers()) {
+
+                if (main.isInArena(pla)) {
+                	pla.sendMessage(msg);
+                }
+            }
+        }
 
         e.getClickedBlock().setType(Material.AIR);
+        
         give(name, p);
         e.setCancelled(true);
 
