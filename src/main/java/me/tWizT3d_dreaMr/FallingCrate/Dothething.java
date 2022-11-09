@@ -1,4 +1,4 @@
-package me.tWizT3d_dreaMr.FallingCrate.copy;
+package me.tWizT3d_dreaMr.FallingCrate;
 
 import org.bukkit.*;
 import org.bukkit.block.*;
@@ -304,6 +304,10 @@ public class Dothething
         }
 
         Block b = e.getClickedBlock();
+        if(b== null) {
+        	log("b is null");
+        	return;
+        }
 		Location loc=b.getLocation();
 		log(b.getType().name());
 		log(""+loc.getBlockX()+" "+loc.getBlockY()+" "+loc.getBlockZ()+" "+loc.getWorld());
@@ -318,7 +322,7 @@ public class Dothething
         if (e.getClickedBlock() == null) {
             return;
         }
-        if (!e.getHand().equals(EquipmentSlot.HAND))
+        if (e.getHand()==null||!e.getHand().equals(EquipmentSlot.HAND))
             return;
         log(""+isPlacedBlock(b));
         if (isPlacedBlock(b)) return;

@@ -1,4 +1,4 @@
-package me.tWizT3d_dreaMr.FallingCrate.copy;
+package me.tWizT3d_dreaMr.FallingCrate;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;

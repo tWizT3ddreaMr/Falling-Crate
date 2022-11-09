@@ -1,4 +1,4 @@
-package me.tWizT3d_dreaMr.FallingCrate.copy;
+package me.tWizT3d_dreaMr.FallingCrate;
 
 import net.md_5.bungee.api.ChatColor;
 
