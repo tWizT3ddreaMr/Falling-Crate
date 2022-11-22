@@ -15,8 +15,9 @@ public class colors {
 
             message = message.replace("&" + color, "" + ChatColor.of(color));
             matcher = pattern.matcher(message);
-
+            
         }
+        message=ChatColor.translateAlternateColorCodes('&', message);
         return message;
 }
 

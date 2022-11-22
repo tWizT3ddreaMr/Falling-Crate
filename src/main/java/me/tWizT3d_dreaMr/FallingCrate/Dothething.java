@@ -338,6 +338,7 @@ public class Dothething
             String msg = colors.formatnp(main.config.getString("Crates." + name + ".Announce.Grab.String"));
             msg=msg.replace("%playar%", p.getName());
             msg=msg.replace("%name%", name);
+            msg=colors.formatnp(msg);
             for (Player pla : Bukkit.getServer().getOnlinePlayers()) {
 
                 if (main.isInArena(pla)) {
