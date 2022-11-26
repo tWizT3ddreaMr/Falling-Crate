@@ -16,8 +16,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.metadata.MetadataValue;
 
-import java.util.*;
-import java.util.logging.Level;
+import java.util.*;;
 
 public class Dothething
   implements Listener
@@ -25,10 +24,9 @@ public class Dothething
   static World world;
   static HashMap<String,Location> locs;
   private static HashMap<Location, Long> times;
-  private static boolean Logger;
   public static boolean init() {
       FileConfiguration config = main.config;
-      Logger=config.contains("Logger") ? (config.isBoolean("Logger") ? config.getBoolean("Logger") : false) : false;
+      
       locs = new HashMap<>();
       times = new HashMap<>();
       List<String> namelist = new ArrayList<>(config.getConfigurationSection("Crates").getKeys(false));
@@ -36,19 +34,19 @@ public class Dothething
           int x = config.getInt("Crates." + key + ".ChestLocation.X");
           int y = config.getInt("Crates." + key + ".ChestLocation.Y");
           int z = config.getInt("Crates." + key + ".ChestLocation.Z");
-    	  log(key+" "+x+", "+y+", "+z);
+    	  Log.debug(key+" "+x+", "+y+", "+z);
           if (Bukkit.getWorld(config.getString("Crates." + key + ".ChestLocation.World")) == null) {
-              Bukkit.getLogger().log(Level.WARNING, "key" + key + " world is null, skipping");
+        	  Log.error( "key" + key + " world is null, skipping");
               continue;
           }
           World world = Bukkit.getWorld(config.getString("Crates." + key + ".ChestLocation.World"));
-    	  log(key+" "+x+", "+y+", "+z+", "+world.getName());
+    	  Log.debug(key+" "+x+", "+y+", "+z+", "+world.getName());
           Location loc = new Location(world, x, y, z);
           locs.put(key, loc);
 
       }
       if (locs.isEmpty()) {
-          Bukkit.getLogger().log(Level.SEVERE, "Chest location list is empty, please check config");
+    	  Log.error("Chest location list is empty, please check config");
           return false;
       }
       return true;
@@ -59,7 +57,7 @@ public class Dothething
 
     Block block = locs.get(type).getBlock();
     if(block==null||block.getType()==Material.AIR) {
-    	Bukkit.getLogger().log(Level.SEVERE, "Chest for "+type+" is null. "+p.getName()+" did not get item.");
+    	Log.error("Chest for "+type+" is null. "+p.getName()+" did not get item.");
     	p.sendMessage(ChatColor.RED+"Chest does not exist.");
     	return;
     }
@@ -107,15 +105,15 @@ public class Dothething
     	count++;
     	countb++;
     }
-    log("countb "+countb+", count "+count+", Viable "+Viable);
+    Log.debug("countb "+countb+", count "+count+", Viable "+Viable);
 
       if(Viable<=0) {
     	p.sendMessage(ChatColor.DARK_AQUA+"Out of Items in the chest. Type: "+ChatColor.AQUA+type);
     }
     int go = (int)Math.round(main.rand(0.0D, Viable - 1));
-    log("go "+go);
+    Log.debug("go "+go);
       if (item3[go] == null || item3[go].getType() == Material.AIR) {
-    	  log("item3 null");
+    	  Log.debug("item3 null");
     	  return;}
       if (main.config.getBoolean("Setting.Armor")) {
           boolean armor = false;
@@ -127,6 +125,7 @@ public class Dothething
 
           if (armor) {
               p.sendMessage(ChatColor.RED + "Remove your armor slot. No Item for you");
+              Log.fileOnly(p.getName()+" "+type+" Armor issue");
               return;
 		    }
     }
@@ -160,13 +159,16 @@ public class Dothething
               FI.setItemMeta(m);
           }
       }
-      log(FI.getType().name());
+      Log.fileOnly(p.getName()+" "+type+" "+ name(FI));
+      Log.debug(FI.getType().name());
       p.getInventory().addItem(FI);
       FI = ret;
 
 
   }
-
+private static String name(ItemStack FI) {
+	return (FI.hasItemMeta() && FI.getItemMeta().hasDisplayName()) ? FI.getItemMeta().getDisplayName() : FI.getType().name();
+}
     public static void SetChest(double d, double e, double f, String keyname, World w)
   {
       if (locs.containsKey(keyname))
@@ -198,7 +200,7 @@ public class Dothething
 
         Material m = Material.getMaterial(bs.get(main.randint(1, bs.size()) - 1).toUpperCase());
         if (m == null) {
-            Bukkit.getLogger().log(Level.SEVERE, "Material in " + keyname + " is null");
+            Log.error("Material in " + keyname + " is null");
             return;
         }
         FallingBlock fb = world.spawnFallingBlock(loc, Bukkit.createBlockData(m));
@@ -243,18 +245,14 @@ public class Dothething
 
     }
 
-    public static void log(String s) {
-    	if(Logger)
-    		Bukkit.getLogger().log(Level.INFO, s);
-    }
     
     @EventHandler
     public void checkBlock(EntityChangeBlockEvent e) {
-    	log("CheckBlock engage");
+    	Log.debug("CheckBlock engage");
         if ((e.getEntity() instanceof FallingBlock fblock)) {
-        	log("is FallingBlock");
+        	Log.debug("is FallingBlock");
             if (isFallingBlock(fblock)) {
-            	log("is my FallingBlock");
+            	Log.debug("is my FallingBlock");
                 Block block = e.getBlock();
                 block.setMetadata("PlacedBlock", new FixedMetadataValue(main.plugin, Boolean.FALSE));
                 block.setMetadata("Group", new FixedMetadataValue(main.plugin, fblock.getName()));
@@ -263,7 +261,7 @@ public class Dothething
     }
 
     public boolean isPlacedBlock(Block b) {
-    	log("isplacedblock engaged");
+    	Log.debug("isplacedblock engaged");
         List<MetadataValue> metaDataValues = b.getMetadata("PlacedBlock");
         Iterator<MetadataValue> localIterator = metaDataValues.iterator();
         if (localIterator.hasNext()) {
@@ -288,7 +286,7 @@ public class Dothething
         Iterator<MetadataValue> localIterator = metaDataValues.iterator();
         if (localIterator.hasNext()) {
             MetadataValue value = localIterator.next();
-            log(value.asString());
+            Log.debug(value.asString());
             return value.asString();
         }
         return null;
@@ -305,15 +303,15 @@ public class Dothething
 
         Block b = e.getClickedBlock();
         if(b== null) {
-        	log("b is null");
+        	Log.debug("b is null");
         	return;
         }
 		Location loc=b.getLocation();
-		log(b.getType().name());
-		log(""+loc.getBlockX()+" "+loc.getBlockY()+" "+loc.getBlockZ()+" "+loc.getWorld());
-		log(" "+System.currentTimeMillis());
+		Log.debug(b.getType().name());
+		Log.debug(""+loc.getBlockX()+" "+loc.getBlockY()+" "+loc.getBlockZ()+" "+loc.getWorld());
+		Log.debug(" "+System.currentTimeMillis());
     	if(times.containsKey(loc)) {
-    		log(" "+times.get(loc));
+    		Log.debug(" "+times.get(loc));
     		if(times.get(loc)+2000>System.currentTimeMillis())
     			return;
     		times.remove(loc);
@@ -324,14 +322,14 @@ public class Dothething
         }
         if (e.getHand()==null||!e.getHand().equals(EquipmentSlot.HAND))
             return;
-        log(""+isPlacedBlock(b));
+        Log.debug(""+isPlacedBlock(b));
         if (isPlacedBlock(b)) return;
         Player p = e.getPlayer();
 
         String name = getName(b);
-        log(name);
+        Log.debug(name);
         if (name == null) {
-            Bukkit.getLogger().log(Level.SEVERE, "Error with name block material: " + b.getType());
+            Log.error("Error with name block material: " + b.getType());
             return;
         }
         if (main.config.contains("Crates." + name + ".Announce.Grab.AnnounceGrab")&&main.config.getBoolean("Crates." + name + ".Announce.Grab.AnnounceGrab")) {

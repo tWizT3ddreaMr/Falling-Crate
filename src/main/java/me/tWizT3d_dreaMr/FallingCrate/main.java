@@ -80,12 +80,12 @@ public class main
 	}
 
 	public void onDisable() {
+		Log.saveFinal();
 	}
 
 	public void onEnable() {
 		mute = false;
 		config = getConfig();
-
 		int version = 1;
 		if (!config.contains("version")) {
 			if (config.getInt("version") != version) {
@@ -119,6 +119,7 @@ public class main
         }
 		
         plugin = this;
+		Log.startup(config.contains("Logger") ? (config.isBoolean("Logger") ? config.getBoolean("Logger") : false) : false);
 		//Move to command
         if(Dothething.init())
         	Bukkit.getPluginManager().registerEvents(new Dothething(), this);
@@ -255,5 +256,8 @@ public class main
       return true;
     }
     return false;
+  }
+  public static Plugin getPlugin() {
+	  return plugin;
   }
 }
