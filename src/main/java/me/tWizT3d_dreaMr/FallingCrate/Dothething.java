@@ -209,7 +209,14 @@ private static String name(ItemStack FI) {
         fb.setMetadata("FallingBlock", new FixedMetadataValue(main.plugin, Boolean.TRUE));
         if (!main.config.contains("Crates." + keyname + ".Announce.AnnounceDrop")) return;
         if (main.config.getBoolean("Crates." + keyname + ".Announce.AnnounceDrop")) {
-            String msg = colors.formatnp(main.config.getString("Crates." + keyname + ".Announce.String"));
+            String msg = "";
+            try {
+            	msg=colors.formatnp(main.config.getString("Crates." + keyname + ".Announce.String"));
+            }
+            catch(NoClassDefFoundError error) {
+                msg=main.config.getString("Crates." + keyname + ".Announce.String");
+            }
+            
             msg=msg.replace("%name%", keyname);
             for (Player p : Bukkit.getServer().getOnlinePlayers()) {
 
@@ -333,10 +340,19 @@ private static String name(ItemStack FI) {
             return;
         }
         if (main.config.contains("Crates." + name + ".Announce.Grab.AnnounceGrab")&&main.config.getBoolean("Crates." + name + ".Announce.Grab.AnnounceGrab")) {
-            String msg = colors.formatnp(main.config.getString("Crates." + name + ".Announce.Grab.String"));
-            msg=msg.replace("%player%", p.getName());
-            msg=msg.replace("%name%", name);
-            msg=colors.formatnp(msg);
+        	String msg =""; colors.formatnp(main.config.getString("Crates." + name + ".Announce.Grab.String"));
+            try {
+            	msg= colors.formatnp(main.config.getString("Crates." + name + ".Announce.Grab.String"));
+	            msg=msg.replace("%player%", p.getName());
+	            msg=msg.replace("%name%", name);
+	            msg=colors.formatnp(msg);
+            }
+            catch(NoClassDefFoundError error) {
+            	Log.error("NoClassDefFoundError, ignoring");
+            	msg= main.config.getString("Crates." + name + ".Announce.Grab.String");
+	            msg=msg.replace("%player%", p.getName());
+	            msg=msg.replace("%name%", name);
+            }
             for (Player pla : Bukkit.getServer().getOnlinePlayers()) {
 
                 if (main.isInArena(pla)) {
