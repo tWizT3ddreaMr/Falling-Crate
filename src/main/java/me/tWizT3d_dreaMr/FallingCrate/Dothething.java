@@ -16,7 +16,8 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.metadata.MetadataValue;
 
-import java.util.*;;
+import java.util.*;
+import java.util.logging.Level;
 
 public class Dothething
   implements Listener
@@ -24,9 +25,10 @@ public class Dothething
   static World world;
   static HashMap<String,Location> locs;
   private static HashMap<Location, Long> times;
+  private static boolean Logger;
   public static boolean init() {
       FileConfiguration config = main.config;
-      
+      Logger=config.contains("Logger") ? (config.isBoolean("Logger") ? config.getBoolean("Logger") : false) : false;
       locs = new HashMap<>();
       times = new HashMap<>();
       List<String> namelist = new ArrayList<>(config.getConfigurationSection("Crates").getKeys(false));
@@ -34,19 +36,19 @@ public class Dothething
           int x = config.getInt("Crates." + key + ".ChestLocation.X");
           int y = config.getInt("Crates." + key + ".ChestLocation.Y");
           int z = config.getInt("Crates." + key + ".ChestLocation.Z");
-    	  Log.debug(key+" "+x+", "+y+", "+z);
+    	  log(key+" "+x+", "+y+", "+z);
           if (Bukkit.getWorld(config.getString("Crates." + key + ".ChestLocation.World")) == null) {
-        	  Log.error( "key" + key + " world is null, skipping");
+              Bukkit.getLogger().log(Level.WARNING, "key" + key + " world is null, skipping");
               continue;
           }
           World world = Bukkit.getWorld(config.getString("Crates." + key + ".ChestLocation.World"));
-    	  Log.debug(key+" "+x+", "+y+", "+z+", "+world.getName());
+    	  log(key+" "+x+", "+y+", "+z+", "+world.getName());
           Location loc = new Location(world, x, y, z);
           locs.put(key, loc);
 
       }
       if (locs.isEmpty()) {
-    	  Log.error("Chest location list is empty, please check config");
+          Bukkit.getLogger().log(Level.SEVERE, "Chest location list is empty, please check config");
           return false;
       }
       return true;
@@ -57,7 +59,7 @@ public class Dothething
 
     Block block = locs.get(type).getBlock();
     if(block==null||block.getType()==Material.AIR) {
-    	Log.error("Chest for "+type+" is null. "+p.getName()+" did not get item.");
+    	Bukkit.getLogger().log(Level.SEVERE, "Chest for "+type+" is null. "+p.getName()+" did not get item.");
     	p.sendMessage(ChatColor.RED+"Chest does not exist.");
     	return;
     }
@@ -105,15 +107,15 @@ public class Dothething
     	count++;
     	countb++;
     }
-    Log.debug("countb "+countb+", count "+count+", Viable "+Viable);
+    log("countb "+countb+", count "+count+", Viable "+Viable);
 
       if(Viable<=0) {
     	p.sendMessage(ChatColor.DARK_AQUA+"Out of Items in the chest. Type: "+ChatColor.AQUA+type);
     }
     int go = (int)Math.round(main.rand(0.0D, Viable - 1));
-    Log.debug("go "+go);
+    log("go "+go);
       if (item3[go] == null || item3[go].getType() == Material.AIR) {
-    	  Log.debug("item3 null");
+    	  log("item3 null");
     	  return;}
       if (main.config.getBoolean("Setting.Armor")) {
           boolean armor = false;
@@ -125,7 +127,6 @@ public class Dothething
 
           if (armor) {
               p.sendMessage(ChatColor.RED + "Remove your armor slot. No Item for you");
-              Log.fileOnly(p.getName()+" "+type+" Armor issue");
               return;
 		    }
     }
@@ -159,16 +160,13 @@ public class Dothething
               FI.setItemMeta(m);
           }
       }
-      Log.fileOnly(p.getName()+" "+type+" "+ name(FI));
-      Log.debug(FI.getType().name());
+      log(FI.getType().name());
       p.getInventory().addItem(FI);
       FI = ret;
 
 
   }
-private static String name(ItemStack FI) {
-	return (FI.hasItemMeta() && FI.getItemMeta().hasDisplayName()) ? FI.getItemMeta().getDisplayName() : FI.getType().name();
-}
+
     public static void SetChest(double d, double e, double f, String keyname, World w)
   {
       if (locs.containsKey(keyname))
@@ -200,7 +198,7 @@ private static String name(ItemStack FI) {
 
         Material m = Material.getMaterial(bs.get(main.randint(1, bs.size()) - 1).toUpperCase());
         if (m == null) {
-            Log.error("Material in " + keyname + " is null");
+            Bukkit.getLogger().log(Level.SEVERE, "Material in " + keyname + " is null");
             return;
         }
         FallingBlock fb = world.spawnFallingBlock(loc, Bukkit.createBlockData(m));
@@ -209,14 +207,13 @@ private static String name(ItemStack FI) {
         fb.setMetadata("FallingBlock", new FixedMetadataValue(main.plugin, Boolean.TRUE));
         if (!main.config.contains("Crates." + keyname + ".Announce.AnnounceDrop")) return;
         if (main.config.getBoolean("Crates." + keyname + ".Announce.AnnounceDrop")) {
-            String msg = "";
-            try {
-            	msg=colors.formatnp(main.config.getString("Crates." + keyname + ".Announce.String"));
-            }
-            catch(NoClassDefFoundError error) {
-                msg=main.config.getString("Crates." + keyname + ".Announce.String");
-            }
-            
+	        String msg = "";
+	        try {
+	        	msg=colors.formatnp(main.config.getString("Crates." + keyname + ".Announce.String"));
+	        }
+	        catch(NoClassDefFoundError error) {
+	            msg=main.config.getString("Crates." + keyname + ".Announce.String");
+	        }
             msg=msg.replace("%name%", keyname);
             for (Player p : Bukkit.getServer().getOnlinePlayers()) {
 
@@ -252,14 +249,18 @@ private static String name(ItemStack FI) {
 
     }
 
+    public static void log(String s) {
+    	if(Logger)
+    		Bukkit.getLogger().log(Level.INFO, s);
+    }
     
     @EventHandler
     public void checkBlock(EntityChangeBlockEvent e) {
-    	Log.debug("CheckBlock engage");
+    	log("CheckBlock engage");
         if ((e.getEntity() instanceof FallingBlock fblock)) {
-        	Log.debug("is FallingBlock");
+        	log("is FallingBlock");
             if (isFallingBlock(fblock)) {
-            	Log.debug("is my FallingBlock");
+            	log("is my FallingBlock");
                 Block block = e.getBlock();
                 block.setMetadata("PlacedBlock", new FixedMetadataValue(main.plugin, Boolean.FALSE));
                 block.setMetadata("Group", new FixedMetadataValue(main.plugin, fblock.getName()));
@@ -268,7 +269,7 @@ private static String name(ItemStack FI) {
     }
 
     public boolean isPlacedBlock(Block b) {
-    	Log.debug("isplacedblock engaged");
+    	log("isplacedblock engaged");
         List<MetadataValue> metaDataValues = b.getMetadata("PlacedBlock");
         Iterator<MetadataValue> localIterator = metaDataValues.iterator();
         if (localIterator.hasNext()) {
@@ -293,7 +294,7 @@ private static String name(ItemStack FI) {
         Iterator<MetadataValue> localIterator = metaDataValues.iterator();
         if (localIterator.hasNext()) {
             MetadataValue value = localIterator.next();
-            Log.debug(value.asString());
+            log(value.asString());
             return value.asString();
         }
         return null;
@@ -301,24 +302,18 @@ private static String name(ItemStack FI) {
 
     @EventHandler
     public void rightClickBlock(PlayerInteractEvent e) {
-        if (main.config.getBoolean("Setting.KnowlegeBook")) {
-            if (!(e.getItem() == null || e.getItem().getType() == null))
-                if (e.getItem().getType() == Material.KNOWLEDGE_BOOK) {
-                    e.setCancelled(true);
-                }
-        }
 
         Block b = e.getClickedBlock();
         if(b== null) {
-        	Log.debug("b is null");
+        	log("b is null");
         	return;
         }
 		Location loc=b.getLocation();
-		Log.debug(b.getType().name());
-		Log.debug(""+loc.getBlockX()+" "+loc.getBlockY()+" "+loc.getBlockZ()+" "+loc.getWorld());
-		Log.debug(" "+System.currentTimeMillis());
+		log(b.getType().name());
+		log(""+loc.getBlockX()+" "+loc.getBlockY()+" "+loc.getBlockZ()+" "+loc.getWorld());
+		log(" "+System.currentTimeMillis());
     	if(times.containsKey(loc)) {
-    		Log.debug(" "+times.get(loc));
+    		log(" "+times.get(loc));
     		if(times.get(loc)+2000>System.currentTimeMillis())
     			return;
     		times.remove(loc);
@@ -329,30 +324,34 @@ private static String name(ItemStack FI) {
         }
         if (e.getHand()==null||!e.getHand().equals(EquipmentSlot.HAND))
             return;
-        Log.debug(""+isPlacedBlock(b));
+        log(""+isPlacedBlock(b));
         if (isPlacedBlock(b)) return;
         Player p = e.getPlayer();
 
         String name = getName(b);
-        Log.debug(name);
+        log(name);
         if (name == null) {
-            Log.error("Error with name block material: " + b.getType());
+            Bukkit.getLogger().log(Level.SEVERE, "Error with name block material: " + b.getType());
             return;
         }
         if (main.config.contains("Crates." + name + ".Announce.Grab.AnnounceGrab")&&main.config.getBoolean("Crates." + name + ".Announce.Grab.AnnounceGrab")) {
-        	String msg =""; colors.formatnp(main.config.getString("Crates." + name + ".Announce.Grab.String"));
+           	String msg =""; colors.formatnp(main.config.getString("Crates." + name + ".Announce.Grab.String"));
+            msg=msg.replace("%player%", p.getName());
             try {
+            msg=msg.replace("%name%", name);
             	msg= colors.formatnp(main.config.getString("Crates." + name + ".Announce.Grab.String"));
+            msg=colors.formatnp(msg);
 	            msg=msg.replace("%player%", p.getName());
 	            msg=msg.replace("%name%", name);
 	            msg=colors.formatnp(msg);
             }
             catch(NoClassDefFoundError error) {
-            	Log.error("NoClassDefFoundError, ignoring");
+            	Bukkit.getLogger().log(Level.SEVERE, "NoClassDefFoundError, ignoring");
             	msg= main.config.getString("Crates." + name + ".Announce.Grab.String");
 	            msg=msg.replace("%player%", p.getName());
 	            msg=msg.replace("%name%", name);
             }
+        	
             for (Player pla : Bukkit.getServer().getOnlinePlayers()) {
 
                 if (main.isInArena(pla)) {
