@@ -1,0 +1,25 @@
+name: FallingCrate
+author: tWizT3d_dreaMr
+version: 1.0.2
+main: me.tWizT3d_dreaMr.FallingCrate.main
+commands:
+   fallcrate:
+      description: Makes a falling crate.
+      usage: /fallcrate keyname
+   setfallcrate:
+      description: Makes a falling crate.
+      usage: setfallcrate x1 y1 z1 x2 y2 z2
+   togglefallcrateevent:
+      description: Makes a falling crate.
+      usage: togglefallcrateeventFCChestSet
+   FCChestSet:
+      description: Makes a falling crate chest
+      usage: FCChestSet x y z (note coords are addative)
+   cratesay:
+      description: Sends a message to all people in the arena.
+      usage: cratesay <message>
+permissions:
+  tCrate.create:
+    default: op
+    description: Allows the player to make a falling crate.
+api-version: 1.18
