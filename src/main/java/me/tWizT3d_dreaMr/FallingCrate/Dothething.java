@@ -361,6 +361,8 @@ public class Dothething
         }
 
         e.getClickedBlock().setType(Material.AIR);
+        e.getClickedBlock().removeMetadata("PlacedBlock", main.plugin);
+        e.getClickedBlock().removeMetadata("Group", main.plugin);
         
         give(name, p);
         e.setCancelled(true);
