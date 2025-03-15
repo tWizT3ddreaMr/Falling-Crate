@@ -1,6 +1,6 @@
 name: FallingCrate
 author: tWizT3d_dreaMr
-version: 1.0.2
+version: 1.0.3
 main: me.tWizT3d_dreaMr.FallingCrate.main
 commands:
    fallcrate:

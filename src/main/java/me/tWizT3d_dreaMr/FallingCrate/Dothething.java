@@ -162,6 +162,23 @@ public class Dothething
       }
       log(FI.getType().name());
       p.getInventory().addItem(FI);
+
+      // announce item won
+      String reward = "something...";
+      if(main.config.getBoolean("Crates." + type + "Announce.Grab.AnnounceGrab"){
+          if(FI.getItemMeta().hasDisplayName()){
+              reward = FI.getItemMeta().getDisplayName();
+          }
+          else{
+              reward = FI.getItemMeta().getItemName();
+          }
+          for (Player pp : Bukkit.getServer().getOnlinePlayers()) {
+              if (main.isInArena(pp)) {
+                  pp.sendMessage(p.getName() + " has won " + reward);
+              }
+          }
+      }
+
       FI = ret;
 
 
