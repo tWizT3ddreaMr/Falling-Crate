@@ -165,11 +165,11 @@ public class Dothething
 
       // announce item won
       String reward = "something...";
-      if(main.config.getBoolean("Crates." + type + "Announce.Grab.AnnounceGrab"){
+      if(main.config.getBoolean("Crates." + type + "Announce.Grab.AnnounceGrab")){
           if(FI.getItemMeta().hasDisplayName()){
               reward = FI.getItemMeta().getDisplayName();
           }
-          else{
+          else if (FI.getItemMeta().hasItemName()){
               reward = FI.getItemMeta().getItemName();
           }
           for (Player pp : Bukkit.getServer().getOnlinePlayers()) {
