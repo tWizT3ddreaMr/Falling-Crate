@@ -7,15 +7,15 @@ fallcrate
   
 FCChestSet
 
-  Usage: FCChestSet <~x> <~y> <~z> 
+  Usage: FCChestSet \<keyname\> <~x> <~y> <~z> 
 
 Cratesay
 
-  Usage: Cratesay <message>
+  Usage: Cratesay \<message\>
 
 setfallcrate
 
-  Usage: setfallcrate <x1> <y1> <z1> <x2> <y2> <z2>
+  Usage: setfallcrate \<x1\> \<y1\> \<z1\> \<x2\> \<y2\> \<z2\>
   
     notes: Sets the drop arena for falling crates and localized chat mutes
     
