@@ -1,5 +1,11 @@
 package me.tWizT3d_dreaMr.FallingCrate;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
+import java.util.Scanner;
+import java.util.logging.Level;
+
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -11,12 +17,6 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
-import java.util.Scanner;
-import java.util.logging.Level;
 
 public class main
 		extends JavaPlugin {
@@ -50,7 +50,7 @@ public class main
 		Random r = new Random();
 		int small = Math.min(d1, d2),
 				big = Math.max(d1, d2);
-		return small+r.nextInt(big-small);
+		return small + r.nextInt(big - small);
 	}
 
 	public static boolean isInArena(Player p) {
@@ -62,7 +62,6 @@ public class main
 		double big, small,
 				x2 = config.getDouble("Location.Arena.X2"),
 				x1 = config.getDouble("Location.Arena.X1");
-
 
 		small = Math.min(x1, x2);
 		big = Math.max(x1, x2);
@@ -116,144 +115,143 @@ public class main
 				config.options().copyDefaults(true);
 				saveConfig();
 			}
-        }
-		
-        plugin = this;
-		//Move to command
-        if(Dothething.init())
-        	Bukkit.getPluginManager().registerEvents(new Dothething(), this);
-        
-  }
+		}
 
-  //TODO
-  //Restructure commands
-  
-  public boolean onCommand(CommandSender sender, Command command, String label, String[] args)
-  {if (command.getName().equalsIgnoreCase("setfallcrate"))
-  {
-	  if (!(sender instanceof BlockCommandSender))
-  {sender.sendMessage(ChatColor.DARK_AQUA+"No support for non-commandblocks");
-  return true;
-  }
-	  if (args.length == 6)
-      {
-        double x1 = getdoub(args[0]),
-          y1 = getdoub(args[1]),
-          z1 = getdoub(args[2]),
-          x2 = getdoub(args[3]),
-          y2 = getdoub(args[4]),
-          z2 = getdoub(args[5]);
-        config = getConfig();
-		config.set("Location.Arena.World", ((BlockCommandSender)sender).getBlock().getWorld().getName());
-		config.set("Location.Arena.X1", x1);
-		config.set("Location.Arena.Y1", y1);
-		config.set("Location.Arena.Z1", z1);
-		config.set("Location.Arena.X2", x2);
-		config.set("Location.Arena.Y2", y2);
-		config.set("Location.Arena.Z2", z2);
-		sender.sendMessage("Area set");
-		saveConfig();
-        }
-  //
-	  return true;
-  }
-  if (command.getName().equalsIgnoreCase("togglefallcrateevent"))
-  {   if (!(sender instanceof BlockCommandSender))
-  		{sender.sendMessage(ChatColor.DARK_AQUA+"No support for non-commandblocks");return true;
-  		}
-	  if(mute) {
-		  for(Player p:Bukkit.getServer().getOnlinePlayers()) {if(isInArena(p)) {
-			  p.sendMessage(""+ChatColor.DARK_AQUA+ChatColor.BOLD+"Chat un-muted in arena");
-		  }
+		plugin = this;
+		// Move to command
+		if (Dothething.init())
+			Bukkit.getPluginManager().registerEvents(new Dothething(), this);
+
+	}
+
+	// TODO
+	// Restructure commands
+
+	public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+		if (command.getName().equalsIgnoreCase("setfallcrate")) {
+			if (!(sender instanceof BlockCommandSender)) {
+				sender.sendMessage(ChatColor.DARK_AQUA + "No support for non-commandblocks");
+				return true;
 			}
-		mute= false;
+			if (args.length == 6) {
+				double x1 = getdoub(args[0]),
+						y1 = getdoub(args[1]),
+						z1 = getdoub(args[2]),
+						x2 = getdoub(args[3]),
+						y2 = getdoub(args[4]),
+						z2 = getdoub(args[5]);
+				config = getConfig();
+				config.set("Location.Arena.World", ((BlockCommandSender) sender).getBlock().getWorld().getName());
+				config.set("Location.Arena.X1", x1);
+				config.set("Location.Arena.Y1", y1);
+				config.set("Location.Arena.Z1", z1);
+				config.set("Location.Arena.X2", x2);
+				config.set("Location.Arena.Y2", y2);
+				config.set("Location.Arena.Z2", z2);
+				sender.sendMessage("Area set");
+				saveConfig();
+			}
+			//
+			return true;
 		}
-	    else {
-			for(Player p:Bukkit.getServer().getOnlinePlayers()) {
-				if(isInArena(p)) 
-					p.sendMessage(""+ChatColor.DARK_AQUA+ChatColor.BOLD+"Chat muted in arena");
-				
+		if (command.getName().equalsIgnoreCase("togglefallcrateevent")) {
+			if (!(sender instanceof BlockCommandSender)) {
+				sender.sendMessage(ChatColor.DARK_AQUA + "No support for non-commandblocks");
+				return true;
+			}
+			if (mute) {
+				for (Player p : Bukkit.getServer().getOnlinePlayers()) {
+					if (isInArena(p)) {
+						p.sendMessage("" + ChatColor.DARK_AQUA + ChatColor.BOLD + "Chat un-muted in arena");
+					}
+				}
+				mute = false;
+			} else {
+				for (Player p : Bukkit.getServer().getOnlinePlayers()) {
+					if (isInArena(p))
+						p.sendMessage("" + ChatColor.DARK_AQUA + ChatColor.BOLD + "Chat muted in arena");
+
+				}
+				mute = true;
+			}
+			return true;
 		}
-		mute=true;
+		if (command.getName().equalsIgnoreCase("FCChestSet")) {
+			if (!(sender instanceof BlockCommandSender || sender instanceof ConsoleCommandSender)) {
+				sender.sendMessage(ChatColor.DARK_AQUA + "No support for non-commandblocks");
+				return true;
+			}
+			if (args.length != 4) {
+				sender.sendMessage("incorrect syntax.");
+				return true;
+			}
+			Location bl = ((BlockCommandSender) sender).getBlock().getLocation();
+
+			Bukkit.getLogger().log(Level.INFO, bl.getWorld().getName());
+			int x = bl.getBlockX() + Integer.parseInt(args[1]),
+					y = bl.getBlockY() + Integer.parseInt(args[2]),
+					z = bl.getBlockZ() + Integer.parseInt(args[3]);
+			Dothething.SetChest(x, y, z, args[0], bl.getWorld());
+			return true;
 		}
-	  return true;
-  }
-  if (command.getName().equalsIgnoreCase("FCChestSet")) {
-	  if (!(sender instanceof BlockCommandSender || sender instanceof ConsoleCommandSender)) {
-		  sender.sendMessage(ChatColor.DARK_AQUA + "No support for non-commandblocks");
-		  return true;
-	  }
-	  if (args.length != 4) {
-		  sender.sendMessage("incorrect syntax.");
-		  return true;
-	  }
-	  Location bl = ((BlockCommandSender) sender).getBlock().getLocation();
+		if (command.getName().equalsIgnoreCase("cratesay")) {
+			if (sender instanceof Player p) {
+				if (!p.hasPermission("tCrate.create")) {
+					p.sendMessage(ChatColor.RED + "No permissions");
+					return true;
+				}
+			}
+			String message;
+			if (args.length == 0) {
+				sender.sendMessage(ChatColor.RED + "Where is your message?");
+				return true;
+			}
+			StringBuilder messageBuilder = new StringBuilder();
+			for (String temp : args)
+				messageBuilder.append(" ").append(temp);
+			message = messageBuilder.toString();
+			message = ChatColor.translateAlternateColorCodes('&', message);
+			for (Player p : Bukkit.getServer().getOnlinePlayers()) {
 
-	  Bukkit.getLogger().log(Level.INFO, bl.getWorld().getName());
-	  int x = bl.getBlockX() + Integer.parseInt(args[1]),
-			  y = bl.getBlockY() + Integer.parseInt(args[2]),
-			  z = bl.getBlockZ() + Integer.parseInt(args[3]);
-	  Dothething.SetChest(x, y, z, args[0], bl.getWorld());
-	  return true;
-  }
-	  if (command.getName().equalsIgnoreCase("cratesay")) {
-		  if (sender instanceof Player p) {
-			  if (!p.hasPermission("tCrate.create")) {
-				  p.sendMessage(ChatColor.RED + "No permissions");
-				  return true;
-			  }
-		  }
-		  String message;
-		  if (args.length == 0) {
-			  sender.sendMessage(ChatColor.RED + "Where is your message?");
-			  return true;
-		  }
-		  StringBuilder messageBuilder = new StringBuilder();
-		  for (String temp : args) messageBuilder.append(" ").append(temp);
-		  message = messageBuilder.toString();
-		  message = ChatColor.translateAlternateColorCodes('&', message);
-		  for (Player p : Bukkit.getServer().getOnlinePlayers()) {
+				if (isInArena(p)) {
+					p.sendMessage(ChatColor.AQUA + "[" + ChatColor.WHITE + ChatColor.BOLD + "Arena" + ChatColor.AQUA + "]"
+							+ colors.formatnp(message));
+				}
+			}
+			sender.sendMessage(ChatColor.AQUA + "You sent:");
+			sender.sendMessage(ChatColor.AQUA + "[" + ChatColor.WHITE + ChatColor.BOLD + "Arena" + ChatColor.AQUA + "]"
+					+ colors.formatnp(message));
+			return true;
+		}
+		if (command.getName().equalsIgnoreCase("fallcrate")) {
+			if (!(sender instanceof BlockCommandSender || sender instanceof ConsoleCommandSender)) {
+				sender.sendMessage(ChatColor.DARK_AQUA + "No support for non-commandblocks");
+				return true;
+			}
 
-			  if (isInArena(p)) {
-				  p.sendMessage(ChatColor.AQUA + "[" + ChatColor.WHITE + ChatColor.BOLD + "Arena" + ChatColor.AQUA + "]" + colors.formatnp(message));
-			  }
-		  }
-		  sender.sendMessage(ChatColor.AQUA + "You sent:");
-		  sender.sendMessage(ChatColor.AQUA + "[" + ChatColor.WHITE + ChatColor.BOLD + "Arena" + ChatColor.AQUA + "]" + colors.formatnp(message));
-		  return true;
-	  }
-	  if (command.getName().equalsIgnoreCase("fallcrate")) {
-		  if (!(sender instanceof BlockCommandSender || sender instanceof ConsoleCommandSender)) {
-			  sender.sendMessage(ChatColor.DARK_AQUA + "No support for non-commandblocks");
-			  return true;
-		  }
+			if (args.length == 1) {
+				config = getConfig();
+				String type = args[0].substring(0, 1).toUpperCase() + args[0].substring(1).toLowerCase();
+				if (!config.contains("Crates.Diamond.ChestLocation.X")) {
+					sender.sendMessage("Section does not exist");
+				}
+				double x1 = config.getDouble("Location.Arena.X1"),
+						y1 = config.getDouble("Location.Arena.Y1"),
+						z1 = config.getDouble("Location.Arena.Z1"),
+						x2 = config.getDouble("Location.Arena.X2"),
+						y2 = config.getDouble("Location.Arena.Y2"),
+						z2 = config.getDouble("Location.Arena.Z2");
+				double x = Math.round(rand(x1, x2)) + 0.5D,
+						y = Math.round(rand(y1, y2)),
+						z = Math.round(rand(z1, z2)) + 0.5D;
+				Dothething.NonPlayer(x, y, z, type, Bukkit.getWorld(config.getString("Location.Arena.World")));
 
+			} else {
+				sender.sendMessage("incorrect syntax.");
+			}
 
-		  if (args.length == 1) {
-			  config = getConfig();
-        	String type=args[0].substring(0,1).toUpperCase()+args[0].substring(1).toLowerCase();
-        	if(!config.contains("Crates.Diamond.ChestLocation.X")) {
-        		sender.sendMessage("Section does not exist");
-        	}
-        	double x1 = config.getDouble("Location.Arena.X1"),
-	          y1 = config.getDouble("Location.Arena.Y1"),
-	          z1 = config.getDouble("Location.Arena.Z1"),
-	          x2 = config.getDouble("Location.Arena.X2"),
-	          y2 = config.getDouble("Location.Arena.Y2"),
-	          z2 = config.getDouble("Location.Arena.Z2");
-	        double x = Math.round(rand(x1, x2)) + 0.5D,
-	          y = Math.round(rand(y1, y2)),
-	          z = Math.round(rand(z1, z2)) + 0.5D;
-			  Dothething.NonPlayer(x, y, z, type, Bukkit.getWorld(config.getString("Location.Arena.World")));
- 	
-        }
-        else
-        {
-          sender.sendMessage("incorrect syntax.");
-        }
-      
-      return true;
-    }
-    return false;
-  }
+			return true;
+		}
+		return false;
+	}
 }
