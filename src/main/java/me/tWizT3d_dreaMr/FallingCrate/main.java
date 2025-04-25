@@ -53,9 +53,7 @@ public class main
 		return small + r.nextInt(big - small);
 	}
 
-	public static boolean isInArena(Player p) {
-
-		Location loc = p.getLocation();
+	public static boolean isInArena(Location loc) {
 		if (!(loc.getWorld().getName().equals(config.get("Location.Arena.World")))) {
 			return false;
 		}
@@ -76,6 +74,11 @@ public class main
 		big = Math.max(z1, z2);
 
 		return loc.getZ() >= small && loc.getZ() <= big;
+	}
+
+	public static boolean isInArena(Player p) {
+		Location loc = p.getLocation();
+		return isInArena(loc);
 	}
 
 	public void onDisable() {
@@ -214,8 +217,9 @@ public class main
 			for (Player p : Bukkit.getServer().getOnlinePlayers()) {
 
 				if (isInArena(p)) {
-					p.sendMessage(ChatColor.AQUA + "[" + ChatColor.WHITE + ChatColor.BOLD + "Arena" + ChatColor.AQUA + "]"
-							+ colors.formatnp(message));
+					p.sendMessage(
+							ChatColor.AQUA + "[" + ChatColor.WHITE + ChatColor.BOLD + "Arena" + ChatColor.AQUA + "]"
+									+ colors.formatnp(message));
 				}
 			}
 			sender.sendMessage(ChatColor.AQUA + "You sent:");

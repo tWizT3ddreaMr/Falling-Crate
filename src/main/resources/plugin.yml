@@ -1,6 +1,6 @@
-name: FallingCrate
-author: tWizT3d_dreaMr
-version: 1.0.3
+name: ${project.artifactId}
+author: tWizT3d_dreaMr, TonyJamesStark
+version: ${project.version}
 main: me.tWizT3d_dreaMr.FallingCrate.main
 commands:
    fallcrate:
@@ -22,4 +22,4 @@ permissions:
   tCrate.create:
     default: op
     description: Allows the player to make a falling crate.
-api-version: 1.21.1
+api-version: 1.21.4

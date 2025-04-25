@@ -12,6 +12,8 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
+import org.bukkit.Registry;
 import org.bukkit.World;
 import org.bukkit.block.Barrel;
 import org.bukkit.block.Block;
@@ -19,9 +21,13 @@ import org.bukkit.block.BlockState;
 import org.bukkit.block.Chest;
 import org.bukkit.block.ShulkerBox;
 import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.EntitySnapshot;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.FallingBlock;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityChangeBlockEvent;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
@@ -29,8 +35,10 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.inventory.meta.SpawnEggMeta;
 import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.metadata.MetadataValue;
+import org.bukkit.metadata.Metadatable;
 
 public class Dothething
         implements Listener {
@@ -67,14 +75,12 @@ public class Dothething
         return true;
     }
 
-    public static void give(String type, Player p) {
-
+    private static ItemStack getRandomItemFrom(String type) {
         Block block = locs.get(type).getBlock();
         if (block == null || block.getType() == Material.AIR) {
             Bukkit.getLogger().log(Level.SEVERE,
-                    "Chest for " + type + " is null. " + p.getName() + " did not get item.");
-            p.sendMessage(ChatColor.RED + "Chest does not exist.");
-            return;
+                    "Chest for " + type + " is null.");
+            return null;
         }
         ItemStack[] item = null;
         BlockState container = block.getState();
@@ -90,10 +96,9 @@ public class Dothething
             item = ((Barrel) container).getInventory().getContents();
         } else {
             Bukkit.getLogger().log(Level.SEVERE,
-                    "Chest for " + type + " is not a container. " + p.getName() + " did not get item.");
+                    "Chest for " + type + " is not a container.");
             Bukkit.getLogger().log(Level.SEVERE, container.toString());
-            p.sendMessage(ChatColor.RED + "Chest is not a container.");
-            return;
+            return null;
         }
 
         int len = item.length;
@@ -123,27 +128,16 @@ public class Dothething
         log("countb " + countb + ", count " + count + ", Viable " + Viable);
 
         if (Viable <= 0) {
-            p.sendMessage(ChatColor.DARK_AQUA + "Out of Items in the chest. Type: " + ChatColor.AQUA + type);
+            log(ChatColor.DARK_AQUA + "Out of Items in the chest. Type: " + ChatColor.AQUA + type);
+            return null;
         }
         int go = (int) Math.round(main.rand(0.0D, Viable - 1));
         log("go " + go);
         if (item3[go] == null || item3[go].getType() == Material.AIR) {
             log("item3 null");
-            return;
+            return null;
         }
-        if (main.config.getBoolean("Setting.Armor")) {
-            boolean armor = false;
-            for (ItemStack i : p.getInventory().getArmorContents()) {
-                if (!(i == null || i.getType() == Material.AIR)) {
-                    armor = true;
-                }
-            }
-
-            if (armor) {
-                p.sendMessage(ChatColor.RED + "Remove your armor slot. No Item for you");
-                return;
-            }
-        }
+        return item3[go].clone();
 
         /*
          * TODO
@@ -168,26 +162,52 @@ public class Dothething
          * 
          * }else {
          */
-        ItemStack FI = item3[go];
-        ItemStack ret = item3[go];
-        if (main.config.getBoolean("Setting.KnowlegeBook")) {
-            if (FI.getType() == Material.KNOWLEDGE_BOOK) {
-                ItemMeta m = FI.getItemMeta();
-                List<String> l = m.getLore();
-                l.add(ChatColor.GREEN + "Awarded to " + p.getName());
-                FI.setItemMeta(m);
+
+    }
+
+    public static void give(String type, Player p) {
+        // player-based checks
+        if (main.config.getBoolean("Setting.Armor")) {
+            boolean armor = false;
+            for (ItemStack i : p.getInventory().getArmorContents()) {
+                if (!(i == null || i.getType() == Material.AIR)) {
+                    armor = true;
+                }
+            }
+
+            if (armor) {
+                p.sendMessage(ChatColor.RED + "Remove your armor slot. No Item for you");
+                return;
             }
         }
-        log(FI.getType().name());
-        p.getInventory().addItem(FI);
+
+        // get item from options
+        ItemStack toGive = getRandomItemFrom(type);
+        if (toGive == null) {
+            p.sendMessage(ChatColor.DARK_AQUA + "Issue awarding item. Check console logs. Type: " +
+                    ChatColor.AQUA + type);
+            return;
+        }
+
+        // give to player (add lore if voucher)
+        if (main.config.getBoolean("Setting.KnowlegeBook")) {
+            if (toGive.getType() == Material.KNOWLEDGE_BOOK) {
+                ItemMeta m = toGive.getItemMeta();
+                List<String> l = m.getLore();
+                l.add(ChatColor.GREEN + "Awarded to " + p.getName());
+                toGive.setItemMeta(m);
+            }
+        }
+        log(toGive.getType().name());
+        p.getInventory().addItem(toGive);
 
         // announce item won
         String reward = "something...";
         if (main.config.getBoolean("Crates." + type + ".Announce.Grab.AnnounceGrab")) {
-            if (FI.getItemMeta().hasDisplayName()) {
-                reward = FI.getItemMeta().getDisplayName();
-            } else if (FI.getItemMeta().hasItemName()) {
-                reward = FI.getItemMeta().getItemName();
+            if (toGive.getItemMeta().hasDisplayName()) {
+                reward = toGive.getItemMeta().getDisplayName();
+            } else if (toGive.getItemMeta().hasItemName()) {
+                reward = toGive.getItemMeta().getItemName();
             }
             for (Player pp : Bukkit.getServer().getOnlinePlayers()) {
                 if (main.isInArena(pp)) {
@@ -195,9 +215,6 @@ public class Dothething
                 }
             }
         }
-
-        FI = ret;
-
     }
 
     public static void SetChest(double d, double e, double f, String keyname, World w) {
@@ -237,6 +254,11 @@ public class Dothething
         fb.setDropItem(false);
         fb.setCustomName(keyname);
         fb.setMetadata("FallingBlock", new FixedMetadataValue(main.plugin, Boolean.TRUE));
+        fb.setMetadata("Group", new FixedMetadataValue(main.plugin, keyname));
+        // if (main.config.contains("Crates."+keyname+".spawner") &&
+        // main.config.getBoolean("Crates."+keyname+".spawner")){
+        // fb.setCancelDrop(true);
+        // }
         if (!main.config.contains("Crates." + keyname + ".Announce.AnnounceDrop"))
             return;
         if (main.config.getBoolean("Crates." + keyname + ".Announce.AnnounceDrop")) {
@@ -293,6 +315,11 @@ public class Dothething
             log("is FallingBlock");
             if (isFallingBlock(fblock)) {
                 log("is my FallingBlock");
+                if (fblock.hasMetadata("Group") &&
+                        main.config.getBoolean("Crates." + fblock.getMetadata("Group") + ".spawner")) {
+                    e.setCancelled(true); // don't place spawner blocks
+                    return;
+                }
                 Block block = e.getBlock();
                 block.setMetadata("PlacedBlock", new FixedMetadataValue(main.plugin, Boolean.FALSE));
                 block.setMetadata("Group", new FixedMetadataValue(main.plugin, fblock.getName()));
@@ -321,7 +348,7 @@ public class Dothething
         return false;
     }
 
-    public String getName(Block b) {
+    public String getName(Metadatable b) {
         List<MetadataValue> metaDataValues = b.getMetadata("Group");
         Iterator<MetadataValue> localIterator = metaDataValues.iterator();
         if (localIterator.hasNext()) {
@@ -401,6 +428,85 @@ public class Dothething
         give(name, p);
         e.setCancelled(true);
 
+    }
+
+    private ItemStack getRandomEggFrom(String group) {
+        ItemStack ret = getRandomItemFrom(group);
+        if (ret.getType().toString().toUpperCase().contains("SPAWN_EGG")) {
+            return ret;
+        }
+        Bukkit.getLogger().severe("Non-spawn egg found in spawner crate: " + ret.toString());
+        return null;
+    }
+
+    @EventHandler(priority = EventPriority.LOWEST)
+    public void onFallingBlockLand(EntityChangeBlockEvent event) {
+        if (!(event.getEntityType() == EntityType.FALLING_BLOCK)) {
+            return;
+        }
+        Block dropSpot = event.getBlock();
+        Entity falling = event.getEntity();
+
+        // check is in arena
+        // check is spawn block
+        // spawn entities
+        // random over spawn eggs in chest
+        // create entities
+        // particles?
+        // remove block (or alternatively, setCancelDrop() on the falling block entity)
+
+        Location loc = dropSpot.getLocation();
+
+        if (!(main.isInArena(loc))) {
+            return;
+        }
+
+        if (!((falling instanceof FallingBlock) && ((FallingBlock) falling).hasMetadata("Group"))) {
+            Bukkit.getLogger().severe("No 'Group' meta for " + falling.toString() + " at " + loc.toString());
+            return;
+        }
+
+        String group = getName(falling);
+        if (!((main.config.contains("Crates." + group + ".spawner") &&
+                main.config.getBoolean("Crates." + group + ".spawner")))) {
+            return;
+        }
+
+        ItemStack toSpawn = getRandomEggFrom(group);
+        if (toSpawn == null) {
+            // chest of drops misconfigured, messaged to console in prev. call
+            event.setCancelled(true);
+            return;
+        }
+
+        SpawnEggMeta meta = (SpawnEggMeta) toSpawn.getItemMeta();
+        EntitySnapshot ent = meta.getSpawnedEntity();
+        String mobType;
+        if (ent == null){
+            // no entity data set, use default entity
+
+            //this is a kludge.. better to directly access the entity through the spawn egg meta but it wasn't working
+            mobType = toSpawn.getType().toString().replace("_SPAWN_EGG","");
+            EntityType eType = Registry.ENTITY_TYPE.get(NamespacedKey.minecraft(mobType.strip().toLowerCase()));
+            for (int i = 0; i < toSpawn.getAmount(); i++) {
+                // spawns however many entities as the count of eggs in the stack
+                // >24 not recommended due to cramming
+                dropSpot.getWorld().spawn(loc, eType.getEntityClass());
+            }
+        } else{
+            for (int i = 0; i < toSpawn.getAmount(); i++) {
+                // spawns however many entities as the count of eggs in the stack
+                // >24 not recommended due to cramming
+                ent.createEntity(loc);
+            }
+            mobType = ent.getEntityType().toString();
+        }
+
+        log(toSpawn.getAmount() + " " + mobType + " 's created at " + loc.toString());
+
+        event.setCancelled(true); // prevent placing the fallen block
+        ((FallingBlock) falling).setCancelDrop(true); // just in case :)
+        dropSpot.setType(Material.AIR);
     }
 
 }
