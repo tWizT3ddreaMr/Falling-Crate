@@ -92,6 +92,7 @@ public class Dothething
             item = ((ShulkerBox) container).getInventory().getContents();
         }
 
+
         else if (container instanceof Barrel) {
             item = ((Barrel) container).getInventory().getContents();
         } else {
@@ -138,6 +139,7 @@ public class Dothething
             return null;
         }
         return item3[go].clone();
+
 
         /*
          * TODO
@@ -215,6 +217,7 @@ public class Dothething
                 }
             }
         }
+
     }
 
     public static void SetChest(double d, double e, double f, String keyname, World w) {
@@ -254,11 +257,13 @@ public class Dothething
         fb.setDropItem(false);
         fb.setCustomName(keyname);
         fb.setMetadata("FallingBlock", new FixedMetadataValue(main.plugin, Boolean.TRUE));
+
         fb.setMetadata("Group", new FixedMetadataValue(main.plugin, keyname));
         // if (main.config.contains("Crates."+keyname+".spawner") &&
         // main.config.getBoolean("Crates."+keyname+".spawner")){
         // fb.setCancelDrop(true);
         // }
+
         if (!main.config.contains("Crates." + keyname + ".Announce.AnnounceDrop"))
             return;
         if (main.config.getBoolean("Crates." + keyname + ".Announce.AnnounceDrop")) {
