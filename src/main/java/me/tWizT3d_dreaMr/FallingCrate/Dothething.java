@@ -188,7 +188,7 @@ public class Dothething
         if (toGive == null) {
             p.sendMessage(ChatColor.DARK_AQUA + "Issue awarding item. Check console logs. Type: " +
                     ChatColor.AQUA + type);
-            log("Problem getting item from award chest: " + p.toString() + " did not receive item.");
+            Bukkit.getLogger().severe("Problem getting item from award chest: " + p.toString() + " did not receive item.");
             return;
         }
 
