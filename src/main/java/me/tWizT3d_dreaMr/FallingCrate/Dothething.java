@@ -221,6 +221,7 @@ public class Dothething
 					pp.sendMessage(msg);
 				}
 			}
+			log(msg);
 		}
 
 	}
