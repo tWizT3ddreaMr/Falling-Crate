@@ -81,6 +81,39 @@ public class main
 		return isInArena(loc);
 	}
 
+	public static boolean isWithinRadius(Location loc){
+		if (!(loc.getWorld().getName().equals(config.get("Location.Arena.World")))) {
+			return false;
+		}
+		double big, small,
+				x2 = config.getDouble("Location.Arena.X2"),
+				x1 = config.getDouble("Location.Arena.X1");
+
+		small = Math.min(x1, x2);
+		big = Math.max(x1, x2);
+
+		double x_center = (small+big)/2.0;
+
+		double z1 = config.getDouble("Location.Arena.Z1"),
+				z2 = config.getDouble("Location.Arena.Z2");
+
+		small = Math.min(z1, z2);
+		big = Math.max(z1, z2);
+
+		double z_center = (small+big)/2.0;
+
+		double radius = config.getDouble("Setting.AnnounceRadius");
+		double dist = Math.sqrt(
+			Math.pow((loc.getBlockX() - x_center),2) + 
+			Math.pow((loc.getBlockZ() - z_center),2));
+		return dist <= radius;
+	}
+
+	public static boolean isWithinRadius(Player p){
+		Location loc = p.getLocation();
+		return isWithinRadius(loc);
+	}
+
 	public void onDisable() {
 	}
 
@@ -100,16 +133,20 @@ public class main
 				config.addDefault("Location.Arena.X2", 0);
 				config.addDefault("Location.Arena.Y2", 0);
 				config.addDefault("Location.Arena.Z2", 0);
+
 				config.addDefault("Setting.Armor", true);
 				config.addDefault("Setting.KnowlegeBook", true);
+				config.addDefault("Setting.AnnounceRadius",500);
 
 				config.addDefault("Crates.Diamond.ChestLocation.X", 0);
 				config.addDefault("Crates.Diamond.ChestLocation.Y", 0);
 				config.addDefault("Crates.Diamond.ChestLocation.Z", 0);
 				config.addDefault("Crates.Diamond.ChestLocation.World", "world");
-
 				config.addDefault("Crates.Diamond.Announce.AnnounceDrop", false);
 				config.addDefault("Crates.Diamond.Announce.String", "Diamond has dropped");
+
+				config.addDefault("Crates.Diamond.Announce.Grab.AnnounceGrab", false);
+				config.addDefault("Crates.Diamond.Announce.Grab.String", "&f%player% has won %item%!");
 
 				List<String> Diamond = new ArrayList<>();
 				Diamond.add("DIAMOND_BLOCK");

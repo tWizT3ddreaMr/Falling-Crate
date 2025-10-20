@@ -1,4 +1,4 @@
-
+.DS_Store
 target/
 bin/
 .idea/
@@ -6,3 +6,5 @@ bin/
 .project
 .settings
 .idea
+.gitattributes
+*.iml
